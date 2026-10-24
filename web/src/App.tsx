@@ -1,3 +1,5 @@
+//where the main methods and features for the app happens here 
+
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { DrawingUtils, PoseLandmarker } from '@mediapipe/tasks-vision'
 import { CONFIG } from './config'
