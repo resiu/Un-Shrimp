@@ -16,7 +16,19 @@ const STATUS_LABEL: Record<PostureStatus, string> = {
   no_person: "Can't see you",
 }
 
-export default function App() {
+/** What the detector reports each frame. ProfilePage uses it to send readings to the backend. */
+export type FrameReport = {
+  angles: Angles | null
+  status: PostureStatus
+  baseline: PostureMonitor['baseline']
+}
+
+export default function App({ onFrame }: { onFrame?: (frame: FrameReport) => void }) {
+  // Kept in a ref so a new onFrame function doesn't restart the detection loop.
+  const onFrameRef = useRef(onFrame)
+  useEffect(() => {
+    onFrameRef.current = onFrame
+  }, [onFrame])
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const landmarkerRef = useRef<PoseLandmarker | null>(null)
@@ -137,6 +149,7 @@ export default function App() {
       const events = monitor.update(a, now)
       setStatus(monitor.status)
       setBaseline(monitor.baseline)
+      onFrameRef.current?.({ angles: a, status: monitor.status, baseline: monitor.baseline })
       for (const e of events) {
         if (e === 'became_bad') {
           addLog('Slouch detected')

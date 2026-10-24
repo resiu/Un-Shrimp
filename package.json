@@ -1,0 +1,12 @@
+{
+  "name": "posture-bot",
+  "private": true,
+  "scripts": {
+    "postinstall": "npm install --prefix web && npm install --prefix backend",
+    "dev": "concurrently --names web,api --prefix-colors yellow,cyan \"npm run dev --prefix web\" \"npm run dev --prefix backend\"",
+    "seed": "npm run seed --prefix backend"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.6"
+  }
+}

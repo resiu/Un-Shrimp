@@ -18,14 +18,18 @@ HIGH BLAST-RADIUS FILES (do not modify without explicit permission):
 
 ## App Overview
 
-Posture Bot (SBUHacks 2026). A side-mounted webcam watches the user; the browser app detects slouching with MediaPipe Pose and warns them with a status badge and a full-screen jumpscare.
+Posture Bot (SBUHacks 2026). A side-mounted webcam watches the user; the browser app detects slouching with MediaPipe Pose and warns them with a status badge and a full-screen jumpscare. Users log in; while monitoring, readings go to a backend that powers stats and live leaderboards.
 
 - `web/` — React + TypeScript + Vite, plain CSS. Runs in Chrome/Edge.
+- `backend/` — Node + Express + ws + SQLite, port 3001. Runs `.ts` directly on Node (>= 22.18), no build step: no enums, namespaces or parameter properties, and `.ts` extensions on imports.
+- Root `npm run dev` starts both; Vite proxies `/api` and `/ws` to the backend.
 - Tunable numbers live in `web/src/config.ts`. Prefer changing config over changing logic.
 
 ## Stack
 
-React, TypeScript, Vite, @mediapipe/tasks-vision.
+Frontend: React, TypeScript, Vite, react-router-dom, @mediapipe/tasks-vision.
+Backend: Node (built-in node:crypto scrypt for passwords), Express, ws, better-sqlite3, jsonwebtoken.
+Root: concurrently.
 The stack is locked. Do NOT install or suggest new packages without explicit approval.
 
 ## Standards

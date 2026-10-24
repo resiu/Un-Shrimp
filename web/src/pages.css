@@ -1,0 +1,36 @@
+/* Starter styles for the login, leaderboard and profile pages.
+   Safe to restyle. Uses the color variables from styles.css only. */
+
+.page { max-width: 1200px; margin: 0 auto; padding: 16px; }
+
+.navbar {
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  padding: 10px 16px; background: var(--panel); border-bottom: 1px solid var(--panel-edge);
+}
+.navbar a { color: var(--text); text-decoration: none; padding: 4px 0; border-bottom: 2px solid transparent; }
+.navbar a.active { color: var(--brass); border-bottom-color: var(--brass); }
+.navbar-spacer { flex: 1; }
+
+.card {
+  background: var(--panel); border: 1px solid var(--panel-edge); border-radius: var(--radius);
+  padding: 4px 16px 16px;
+}
+.card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+
+.login-page { display: grid; place-items: center; min-height: 80vh; }
+.login-card { display: flex; flex-direction: column; gap: 12px; width: min(100%, 340px); padding: 20px; }
+.login-card input {
+  font: inherit; color: var(--text); background: var(--bg);
+  border: 1px solid var(--panel-edge); border-radius: 6px; padding: 8px 10px;
+}
+.link-button { background: none; border: none; color: var(--brass); }
+
+.board-list { margin: 0; padding-left: 1.4em; }
+.board-list li { padding: 4px 0; border-bottom: 1px solid var(--panel-edge); }
+.board-list li span:first-child { margin-right: 8px; }
+
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
+.stat { padding: 12px 16px; }
+.stat-value { font-size: 1.6rem; font-weight: 700; color: var(--brass); font-variant-numeric: tabular-nums; }
+
+.monitor-bar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin: 16px 0 0; }

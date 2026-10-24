@@ -1,6 +1,6 @@
 import { createRoot } from 'react-dom/client'
 import './styles.css'
-import App from './App.tsx'
+import { AppRoutes } from './AppRoutes.tsx'
 
 // Note: no <StrictMode> on purpose. It double-starts effects in dev, which
 // makes camera + model setup confusing to debug at 3am.
@@ -14,4 +14,5 @@ import App from './App.tsx'
 // Attribute nodes
 // Text Nodes
 
-createRoot(document.getElementById('root')!).render(<App />)
+// AppRoutes adds login + pages around the detector (App.tsx); see AppRoutes.tsx.
+createRoot(document.getElementById('root')!).render(<AppRoutes />)
