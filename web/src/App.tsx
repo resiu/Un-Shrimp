@@ -5,7 +5,6 @@ import { DrawingUtils, PoseLandmarker } from '@mediapipe/tasks-vision'
 import { CONFIG } from './config'
 import { createPoseLandmarker } from './lib/pose'
 import { computeAngles, PostureMonitor, type Angles, type PostureStatus } from './lib/posture'
-import { ArduinoLink, type RobotCommand } from './lib/serial'
 import { playScreech, unlockAudio } from './lib/sound'
 import { Jumpscare } from './components/Jumpscare'
 
@@ -22,13 +21,11 @@ export default function App() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const landmarkerRef = useRef<PoseLandmarker | null>(null)
   const monitorRef = useRef(new PostureMonitor())
-  const arduinoRef = useRef(new ArduinoLink())
 
   const [cameras, setCameras] = useState<MediaDeviceInfo[]>([])
   const [cameraId, setCameraId] = useState('')
   const [cameraOn, setCameraOn] = useState(false)
   const [modelReady, setModelReady] = useState(false)
-  const [robotConnected, setRobotConnected] = useState(false)
   const [status, setStatus] = useState<PostureStatus>('uncalibrated')
   const [angles, setAngles] = useState<Angles | null>(null)
   const [baseline, setBaseline] = useState<PostureMonitor['baseline']>(null)
@@ -40,16 +37,7 @@ export default function App() {
     setLog((l) => [`${t}  ${msg}`, ...l].slice(0, 40))
   }, [])
 
-  const sendRobot = useCallback(
-    (cmd: RobotCommand) => {
-      void arduinoRef.current.send(cmd)
-      addLog(`→ robot: ${cmd}`)
-    },
-    [addLog],
-  )
-
   const triggerJumpscare = useCallback(() => {
-    sendRobot('J')
     playScreech()
     setShowJumpscare(true)
     setTimeout(() => setShowJumpscare(false), 1500)
@@ -57,7 +45,7 @@ export default function App() {
     if (document.hidden && Notification.permission === 'granted') {
       new Notification('SIT UP STRAIGHT 👹', { body: 'Posture Bot is watching you.' })
     }
-  }, [sendRobot])
+  }, [])
 
   // ---- Load the pose model once ----
   useEffect(() => {
@@ -99,22 +87,6 @@ export default function App() {
     setCameraOn(true)
     addLog('Camera started')
     void refreshCameras() // now we get real camera names
-  }
-
-  const connectRobot = async () => {
-    const link = arduinoRef.current
-    link.onLine = (line) => addLog(`← robot: ${line}`)
-    link.onDisconnect = () => {
-      setRobotConnected(false)
-      addLog('Robot disconnected')
-    }
-    try {
-      await link.connect()
-      setRobotConnected(true)
-      addLog('Robot connected')
-    } catch (err) {
-      addLog(`Robot connect failed: ${err}`)
-    }
   }
 
   const calibrate = () => {
@@ -167,10 +139,8 @@ export default function App() {
       setBaseline(monitor.baseline)
       for (const e of events) {
         if (e === 'became_bad') {
-          sendRobot('B')
           addLog('Slouch detected')
         } else if (e === 'became_good') {
-          sendRobot('G')
           addLog('Back to good posture')
         } else if (e === 'jumpscare') {
           triggerJumpscare()
@@ -179,9 +149,7 @@ export default function App() {
     }, CONFIG.detectIntervalMs)
 
     return () => clearInterval(id)
-  }, [cameraOn, modelReady, addLog, sendRobot, triggerJumpscare])
-
-  const serialSupported = ArduinoLink.isSupported()
+  }, [cameraOn, modelReady, addLog, triggerJumpscare])
 
   return (
     <div className={`app status-${status}`}>
@@ -205,16 +173,10 @@ export default function App() {
           </select>
         </label>
         <button onClick={startCamera}>{cameraOn ? 'Switch camera' : '1. Start camera'}</button>
-        <button onClick={connectRobot} disabled={!serialSupported || robotConnected}>
-          {robotConnected ? 'Robot connected ✓' : '2. Connect robot'}
-        </button>
         <button onClick={calibrate} disabled={!cameraOn || !modelReady} className="primary">
-          3. Calibrate (sit up straight)
+          2. Calibrate (sit up straight)
         </button>
       </section>
-      {!serialSupported && (
-        <p className="warn">Web Serial isn't supported here. Use Chrome or Edge on a laptop.</p>
-      )}
       {!modelReady && <p className="muted">Loading pose model…</p>}
 
       <main>
@@ -255,13 +217,6 @@ export default function App() {
             </tbody>
           </table>
           <p className="muted small">Side seen: {angles?.side ?? '—'}</p>
-
-          <h2>Test the robot</h2>
-          <div className="row">
-            <button onClick={() => sendRobot('G')}>Calm (G)</button>
-            <button onClick={() => sendRobot('B')}>Angry (B)</button>
-            <button onClick={triggerJumpscare}>Jumpscare (J)</button>
-          </div>
 
           <h2>Log</h2>
           <ol className="log">

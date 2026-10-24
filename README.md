@@ -1,31 +1,26 @@
 # Posture Bot 👹🪑
 
-A grumpy steampunk plush that watches you from the side and gets **angry** when you slouch.
+A webcam + browser app that watches you from the side and gets **angry** when you slouch.
 Built at SBUHacks 2026 ("Steel and Steam").
 
 ```
-[USB webcam inside the plush, side view]
+[USB webcam, side view]
               │
               ▼
 [Laptop: Chrome web app]
    - MediaPipe Pose finds your ear, shoulder, hip
    - Measures how far your head/torso lean vs. YOUR calibrated good posture
-   - Slouch for 3 s  → robot gets angry
+   - Slouch for 3 s  → app warns you
    - Still slouching → full-screen jumpscare
-              │  USB serial: "G" / "B" / "J"
-              ▼
-[Arduino: eyebrow servos + buzzer + LEDs]
 ```
 
 ## Repo layout
 
 ```
-arduino/posture_bot/posture_bot.ino   Arduino sketch (servos, buzzer, LEDs)
 web/                                  React + TypeScript + Vite app
   src/config.ts                       ⭐ all tunable numbers (thresholds, timings)
   src/lib/posture.ts                  angle math + calibration + slouch timer
   src/lib/pose.ts                     loads the MediaPipe pose model
-  src/lib/serial.ts                   talks to the Arduino (Web Serial)
   src/lib/sound.ts                    jumpscare screech (generated, no file needed)
   src/components/Jumpscare.tsx        full-screen jumpscare
   src/App.tsx                         the page + main loop
@@ -34,13 +29,28 @@ docs/TASKS.md                         who does what + milestones
 
 ## Setup (Windows)
 
-Install once: [Node.js LTS](https://nodejs.org), [Git](https://git-scm.com), [Arduino IDE 2](https://www.arduino.cc/en/software), and use **Chrome or Edge** (Web Serial doesn't work in Firefox/Safari).
+### Install these first
+
+- [Node.js LTS](https://nodejs.org). Use the Windows installer and keep the default options.
+- [Git](https://git-scm.com). Keep the default options.
+- **Chrome or Edge**.
+- Optional: [VS Code](https://code.visualstudio.com) for editing the code.
+
+Open a **new** terminal (PowerShell) and check that everything installed:
+
+```bash
+node -v
+npm -v
+git --version
+```
+
+Each command should print a version number.
 
 ### Run the web app
 
 ```bash
-git clone <this repo url>
-cd posture-bot/web
+git clone https://github.com/resiu/SBUHacks-2026.git
+cd SBUHacks-2026/web
 npm install
 npm run dev
 ```
@@ -48,20 +58,15 @@ npm run dev
 Open **http://localhost:5173** in Chrome. Then:
 
 1. Pick the USB webcam in the dropdown → **Start camera** (allow camera access).
-2. **Connect robot** → choose the Arduino's COM port.
-3. Sit up straight → **Calibrate**. Hold still ~3 seconds.
-4. Slouch. 😈
+2. Sit up straight → **Calibrate**. Hold still ~3 seconds.
+3. Slouch. 😈
 
-The **Test the robot** buttons send G/B/J without needing the camera — great for hardware testing.
+> The camera only works on `localhost` (or HTTPS). Opening the app from another laptop by IP address won't work; each laptop runs its own `npm run dev`.
 
-> Camera and serial only work on `localhost` (or HTTPS). Opening the app from another laptop by IP address won't work; each laptop runs its own `npm run dev`.
+### Common problems
 
-### Upload the Arduino sketch
-
-1. Open `arduino/posture_bot/posture_bot.ino` in Arduino IDE.
-2. Tools → Board → your board (e.g. Arduino Uno); Tools → Port → the COM port.
-3. Upload. Open Serial Monitor (9600 baud, "Newline"), you should see `READY`. Type `B`, `G`, `J` to test.
-4. **Close the Serial Monitor** before clicking "Connect robot" in the web app. Only one program can hold the COM port.
+- **Camera isn't in the dropdown:** click **Start camera** once to grant camera permission. The list fills in after that.
+- **`npm` / `node` is not recognized:** close and reopen the terminal after installing Node.js. Restart VS Code too if you're using its terminal.
 
 ## Camera placement tips
 
@@ -90,4 +95,4 @@ The **Live angles** panel shows Now / Baseline / Limit, so you can watch the num
 
 ## Built with
 
-React, TypeScript, Vite, [MediaPipe Pose Landmarker](https://ai.google.dev/edge/mediapipe/solutions/vision/pose_landmarker), Web Serial API, Arduino.
+React, TypeScript, Vite, [MediaPipe Pose Landmarker](https://ai.google.dev/edge/mediapipe/solutions/vision/pose_landmarker).
