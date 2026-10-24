@@ -86,4 +86,25 @@ export const api = {
   startSession: () => request<{ sessionId: number }>('POST', '/sessions'),
   sendReading: (reading: PostureReading) => request<{ ok: true }>('POST', '/posture', reading),
   leaderboard: () => request<Leaderboard>('GET', '/leaderboard'),
+  roast: () => fetchRoast(),
+}
+
+/**
+ * POST /api/roast. Not JSON like the others: on success the body is an MP3.
+ * Returns the audio plus the line's text, or just the text (audio: null) when the
+ * server has no ElevenLabs voice available, so the caller can speak it another way.
+ */
+async function fetchRoast(): Promise<{ text: string; audio: Blob | null }> {
+  const token = getToken()
+  const res = await fetch('/api/roast', {
+    method: 'POST',
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  })
+  if (res.ok) {
+    const text = decodeURIComponent(res.headers.get('X-Roast-Text') ?? '')
+    return { text, audio: await res.blob() }
+  }
+  const data = await res.json().catch(() => ({}))
+  if (typeof data.text === 'string') return { text: data.text, audio: null }
+  throw new ApiError(res.status, data.error ?? `Roast failed (${res.status})`)
 }
