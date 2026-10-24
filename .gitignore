@@ -7,3 +7,6 @@ Thumbs.db
 *.log
 .vscode/*
 !.vscode/extensions.json
+# backend secrets + local SQLite database
+backend/.env
+backend/*.db*
