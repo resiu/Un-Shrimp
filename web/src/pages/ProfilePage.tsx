@@ -12,6 +12,7 @@ import App, { type FrameReport } from '../App'
 import { api, type MyStats } from '../api/http'
 import { onSocketMessage } from '../api/socket'
 import { REPORT_INTERVAL_MS, toReading } from '../lib/reading'
+import { ShrimpIcon } from '../components/ShrimpIcon'
 
 export function ProfilePage() {
   const [stats, setStats] = useState<MyStats | null>(null)
@@ -63,7 +64,7 @@ export function ProfilePage() {
 
   return (
     <div className="page">
-      <h1>Shrimp Stats 🦐{stats && ` · ${stats.username}`}</h1>
+      <h1>Shrimp Stats <ShrimpIcon />{stats && ` · ${stats.username}`}</h1>
 
       <div className="stat-grid">
         <Stat label="Avg score" value={stats?.avgScore ?? '—'} />

@@ -3,6 +3,9 @@
 
 .page { max-width: 1200px; margin: 0 auto; padding: 16px; }
 
+/* Shrimp mascot used in place of the 🦐 emoji (components/ShrimpIcon.tsx) */
+.shrimp-icon { height: 1.2em; width: auto; vertical-align: middle; }
+
 .navbar {
   display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
   padding: 10px 16px; background: var(--panel); border-bottom: 1px solid var(--panel-edge);

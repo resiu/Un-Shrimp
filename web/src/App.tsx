@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { DrawingUtils, PoseLandmarker } from '@mediapipe/tasks-vision'
 import { CONFIG } from './config'
@@ -6,13 +6,14 @@ import { createPoseLandmarker } from './lib/pose'
 import { computeAngles, PostureMonitor, type Angles, type PostureStatus } from './lib/posture'
 import { playScreech, unlockAudio } from './lib/sound'
 import { Jumpscare } from './components/Jumpscare'
+import { ShrimpIcon } from './components/ShrimpIcon'
 import './dashboard.css'
 
 
-const STATUS_LABEL: Record<PostureStatus, string> = {
+const STATUS_LABEL: Record<PostureStatus, ReactNode> = {
   uncalibrated: 'Not calibrated',
   calibrating: 'Calibrating… sit up straight!',
-  good: 'Good posture 🦐✨',
+  good: <>Good posture <ShrimpIcon />✨</>,
   bad: 'SLOUCHING! ⚠️',
   no_person: "Can't see you",
 }
@@ -64,7 +65,10 @@ export default function App({ onFrame }: { onFrame?: (frame: FrameReport) => voi
     setShowJumpscare(true)
     setTimeout(() => setShowJumpscare(false), 1500)
     if (document.hidden && Notification.permission === 'granted') {
-      new Notification('SIT UP STRAIGHT 🦐', { body: 'Posture Shrimp is watching you!' })
+      new Notification('SIT UP STRAIGHT', {
+        body: 'Posture Shrimp is watching you!',
+        icon: '/cookedShrimp.png',
+      })
     }
   }, [])
 
@@ -213,7 +217,7 @@ export default function App({ onFrame }: { onFrame?: (frame: FrameReport) => voi
 
       <div className="dash-content">
         <header className="dash-header">
-          <h1 className="dash-title">🦐 Posture Bot Dashboard</h1>
+          <h1 className="dash-title"><ShrimpIcon /> Posture Bot Dashboard</h1>
           <span className={`dash-pill${bad ? ' is-bad' : ''}`}>{STATUS_LABEL[status]}</span>
         </header>
 
