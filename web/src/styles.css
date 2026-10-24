@@ -1,0 +1,85 @@
+/* Steel & Steam palette */
+:root {
+  --bg: #17120e;
+  --panel: #231b15;
+  --panel-edge: #3b2e22;
+  --brass: #c99a3e;
+  --brass-dim: #8a6a2c;
+  --copper: #c4643a;
+  --text: #efe4d0;
+  --muted: #a8977f;
+  --good: #6fae6a;
+  --bad: #e0442c;
+  --radius: 10px;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  color: var(--text);
+  background: var(--bg);
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); }
+h1, h2 { font-family: Georgia, 'Times New Roman', serif; letter-spacing: 0.02em; }
+h1 { margin: 0; color: var(--brass); font-size: 1.8rem; }
+h2 { font-size: 1rem; color: var(--brass); margin: 1.2rem 0 0.5rem; text-transform: uppercase; }
+
+.app { max-width: 1200px; margin: 0 auto; padding: 16px; transition: box-shadow 0.3s; }
+.app.status-bad { box-shadow: inset 0 0 0 4px var(--bad); }
+
+header { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+
+.pill { padding: 6px 14px; border-radius: 999px; font-weight: 600; border: 1px solid var(--panel-edge); background: var(--panel); }
+.pill-good { background: color-mix(in srgb, var(--good) 25%, var(--panel)); border-color: var(--good); }
+.pill-bad { background: var(--bad); border-color: var(--bad); color: white; animation: pulse 0.8s infinite alternate; }
+.pill-calibrating { border-color: var(--brass); color: var(--brass); }
+
+.controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; margin: 16px 0; }
+label { display: flex; flex-direction: column; gap: 4px; font-size: 0.85rem; color: var(--muted); }
+select, button {
+  font: inherit; color: var(--text); background: var(--panel);
+  border: 1px solid var(--brass-dim); border-radius: var(--radius); padding: 8px 14px;
+}
+button { cursor: pointer; }
+button:hover:not(:disabled) { border-color: var(--brass); }
+button:disabled { opacity: 0.45; cursor: not-allowed; }
+button.primary { background: var(--brass); color: #1a120a; border-color: var(--brass); font-weight: 600; }
+
+main { display: grid; grid-template-columns: 1fr 340px; gap: 16px; }
+@media (max-width: 900px) { main { grid-template-columns: 1fr; } }
+
+.stage { position: relative; background: #000; border: 2px solid var(--panel-edge); border-radius: var(--radius); overflow: hidden; aspect-ratio: 16 / 9; }
+.stage video, .stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+.stage-empty { position: absolute; inset: 0; display: grid; place-items: center; color: var(--muted); }
+
+aside { background: var(--panel); border: 1px solid var(--panel-edge); border-radius: var(--radius); padding: 4px 16px 16px; }
+table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: 4px 6px; border-bottom: 1px solid var(--panel-edge); }
+th { color: var(--muted); font-weight: 500; font-size: 0.8rem; }
+.row { display: flex; gap: 8px; flex-wrap: wrap; }
+.log { list-style: none; padding: 0; margin: 0; max-height: 220px; overflow-y: auto; font-family: Consolas, monospace; font-size: 0.78rem; color: var(--muted); }
+.muted { color: var(--muted); }
+.small { font-size: 0.8rem; }
+.warn { color: var(--bad); }
+
+/* Jumpscare */
+.jumpscare {
+  position: fixed; inset: 0; z-index: 1000; background: #0a0000;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  animation: shake 0.12s infinite;
+}
+.jumpscare-face { width: min(80vw, 80vh); height: auto; animation: lunge 0.25s ease-out forwards; }
+.jumpscare-text { font-family: Georgia, serif; font-size: clamp(2rem, 7vw, 5rem); color: var(--bad); font-weight: 900; margin-top: -2vh; }
+.eye-glow { filter: drop-shadow(0 0 12px #ff0000); }
+
+@keyframes lunge { from { transform: scale(0.3); } to { transform: scale(1.05); } }
+@keyframes shake {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(-8px, 5px); }
+  50% { transform: translate(6px, -6px); }
+  75% { transform: translate(-5px, -4px); }
+  100% { transform: translate(0, 0); }
+}
+@keyframes pulse { from { opacity: 1; } to { opacity: 0.7; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .jumpscare, .jumpscare-face, .pill-bad { animation: none; }
+}
