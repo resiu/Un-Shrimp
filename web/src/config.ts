@@ -2,20 +2,27 @@
 // Change a number, save, and Vite hot-reloads the app.
 
 export const CONFIG = {
+  /*For side-view detection */
   // How many degrees WORSE than your calibrated "good" posture counts as slouching.
-  neckToleranceDeg: 12, // ear-over-shoulder angle (head jutting forward)
-  torsoToleranceDeg: 8, // shoulder-over-hip angle (leaning/hunching). Only used if hips are visible.
+  // neckToleranceDeg: 6, // ear-over-shoulder angle (head jutting forward)
+  // torsoToleranceDeg: 4, // shoulder-over-hip angle (leaning/hunching). Only used if hips are visible.
+
+  /*For front-view detection : how far from your calibrated posture counts as slouching*/
+  // lower number higher sensitivity
+  faceGrowth: 0.06,    // head moves toward camera: ear-to-ear width grows 12%+ vs. shoulder width
+  neckDrop: 0.08,      // head sinks toward shoulders: nose-to-shoulder gap shrinks 15%+
+  tiltTolerance: 0.03, // one shoulder lower than the other (as a
 
   // How long you must be slouching before we react (avoids false alarms
   // when you reach for a drink).
-  badHoldMs: 3000,
+  badHoldMs: 2000,
   // How long you must sit up straight before we calm down.
   goodHoldMs: 1000,
 
   // After the screen jumpscare fires, wait this long before it can fire again.
   jumpscareCooldownMs: 20000,
   // If you STAY slouched this long after slouching is detected, escalate to the jumpscare.
-  jumpscareAfterBadMs: 4000,
+  jumpscareAfterBadMs: 3000,
 
   // Landmarks with visibility below this are ignored.
   minVisibility: 0.5,

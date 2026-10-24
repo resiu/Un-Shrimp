@@ -16,7 +16,19 @@ const STATUS_LABEL: Record<PostureStatus, string> = {
   no_person: "Can't see you",
 }
 
-export default function App() {
+/** What the detector reports each frame. ProfilePage uses it to send readings to the backend. */
+export type FrameReport = {
+  angles: Angles | null
+  status: PostureStatus
+  baseline: PostureMonitor['baseline']
+}
+
+export default function App({ onFrame }: { onFrame?: (frame: FrameReport) => void }) {
+  // Kept in a ref so a new onFrame function doesn't restart the detection loop.
+  const onFrameRef = useRef(onFrame)
+  useEffect(() => {
+    onFrameRef.current = onFrame
+  }, [onFrame])
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const landmarkerRef = useRef<PoseLandmarker | null>(null)
@@ -100,21 +112,21 @@ export default function App() {
 
   // ---- Main detection loop ----
   useEffect(() => {
-    if (!cameraOn || !modelReady) return
-    const video = videoRef.current!
-    const canvas = canvasRef.current!
+    if (!cameraOn || !modelReady) return //detecting if camera is on, if not --> do nothing
+    const video = videoRef.current! //grabs <video> element
+    const canvas = canvasRef.current! //grabs <canvas> element
     const ctx = canvas.getContext('2d')!
-    const drawer = new DrawingUtils(ctx)
-    let lastVideoTime = -1
+    const drawer = new DrawingUtils(ctx) //DrawingUtils is MediaPipe's helper for drawing the skeleton
+    let lastVideoTime = -1 //remembers the last frame processed so the same frame isn't analyzed more than once
 
-    const id = setInterval(() => {
+    const id = setInterval(() => { //runs every 100ms
       const lm = landmarkerRef.current
-      if (!lm || video.readyState < 2 || video.currentTime === lastVideoTime) return
+      if (!lm || video.readyState < 2 || video.currentTime === lastVideoTime) return //skips iteration if video has no data yet, or else mediaPipe will throw an error
       lastVideoTime = video.currentTime
 
       const now = performance.now()
       const result = lm.detectForVideo(video, now)
-      const pose = result.landmarks[0]
+      const pose = result.landmarks[0] //the body's first 33 body points, or undefined if nobody is detected
       const w = video.videoWidth
       const h = video.videoHeight
 
@@ -122,7 +134,7 @@ export default function App() {
       canvas.width = w
       canvas.height = h
       ctx.clearRect(0, 0, w, h)
-      if (pose) {
+      if (pose) { //if a person is on camera, draw the skeleton lines and joints
         drawer.drawConnectors(pose, PoseLandmarker.POSE_CONNECTIONS, {
           color: '#e0b04f',
           lineWidth: 3,
@@ -130,13 +142,15 @@ export default function App() {
         drawer.drawLandmarks(pose, { color: '#ff5a36', radius: 3 })
       }
 
+      //Turns landmarks into angles (neck, torso, side), or null if ear and shoulder aren't visible
       const a = computeAngles(pose, w, h)
-      setAngles(a)
+      setAngles(a) //updates the "Live Angles" table
 
       const monitor = monitorRef.current
       const events = monitor.update(a, now)
       setStatus(monitor.status)
       setBaseline(monitor.baseline)
+      onFrameRef.current?.({ angles: a, status: monitor.status, baseline: monitor.baseline })
       for (const e of events) {
         if (e === 'became_bad') {
           addLog('Slouch detected')
@@ -148,8 +162,9 @@ export default function App() {
       }
     }, CONFIG.detectIntervalMs)
 
-    return () => clearInterval(id)
-  }, [cameraOn, modelReady, addLog, triggerJumpscare])
+    return () => clearInterval(id) //stop the timer when camera stops
+  }, [cameraOn, modelReady, addLog, triggerJumpscare]) //dependency array; tells react when to re-run this method; re-runs whenever any value in the array changes     
+                                                          //between renders
 
   return (
     <div className={`app status-${status}`}>
@@ -199,24 +214,28 @@ export default function App() {
             </thead>
             <tbody>
               <tr>
-                <td>Neck</td>
-                <td>{fmt(angles?.neck)}</td>
-                <td>{fmt(baseline?.neck)}</td>
-                <td>{baseline ? fmt(baseline.neck + CONFIG.neckToleranceDeg) : '—'}</td>
+                <td>Head size</td>
+                <td>{fmt(angles?.face)}</td>
+                <td>{fmt(baseline?.face)}</td>
+                <td>{baseline ? fmt(baseline.face * (1 + CONFIG.faceGrowth)) : '—'}</td>
               </tr>
               <tr>
-                <td>Torso</td>
-                <td>{fmt(angles?.torso)}</td>
-                <td>{fmt(baseline?.torso)}</td>
-                <td>
-                  {baseline?.torso != null
-                    ? fmt(baseline.torso + CONFIG.torsoToleranceDeg)
-                    : 'neck only'}
-                </td>
+                <td>Neck gap</td>
+                <td>{fmt(angles?.neck)}</td>
+                <td>{fmt(baseline?.neck)}</td>
+                <td>{baseline ? fmt(baseline.neck * (1 - CONFIG.neckDrop)) : '—'}</td>
+              </tr>
+              <tr>
+                <td>Shoulder tilt</td>
+                <td>{fmt(angles?.tilt)}</td>
+                <td>{fmt(baseline?.tilt)}</td>
+                <td>{baseline ? fmt(baseline.tilt + CONFIG.tiltTolerance) : '—'}</td>
               </tr>
             </tbody>
           </table>
-          <p className="muted small">Side seen: {angles?.side ?? '—'}</p>
+          {/* <p className="muted small">Side seen: {angles?.side ?? '—'}</p> */}
+
+
 
           <h2>Log</h2>
           <ol className="log">
@@ -231,5 +250,6 @@ export default function App() {
 }
 
 function fmt(n: number | null | undefined) {
-  return n == null ? '—' : `${n.toFixed(1)}°`
+  // return n == null ? '—' : `${n.toFixed(1)}°`
+  return n == null ? '-' : n.toFixed(2);
 }
