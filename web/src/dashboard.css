@@ -1,0 +1,139 @@
+/* Ocean dashboard (App.tsx). Moved out of inline styles; same look.
+   Every rule sits under .dashboard so it wins over the global element rules in styles.css. */
+
+.dashboard {
+  /* Ocean palette */
+  --ocean-accent: #38bdf8;
+  --ocean-accent-soft: #7dd3fc;
+  --ocean-accent-strong: #0284c7;
+  --ocean-accent-deep: #0369a1;
+  --ocean-ink: #0f172a;
+  --ocean-text: #ffffff;
+  --ocean-muted: #94a3b8;
+  --ocean-log: #cbd5e1;
+  --ocean-alert: #ef4444;
+  --ocean-alert-edge: #f87171;
+  --ocean-alert-glass: rgba(225, 29, 72, 0.85);
+  --ocean-alert-pale: #fecdd3;
+  --ocean-alert-text: #ffe4e6;
+  --ocean-alert-glow: rgba(225, 29, 72, 0.6);
+  --ocean-glass: rgba(15, 23, 42, 0.75);
+  --ocean-glass-light: rgba(15, 23, 42, 0.65);
+  --ocean-glass-pill: rgba(15, 23, 42, 0.8);
+  --ocean-edge: rgba(255, 255, 255, 0.1);
+  --ocean-edge-accent: rgba(56, 189, 248, 0.3);
+  --ocean-edge-stage: rgba(56, 189, 248, 0.4);
+  --ocean-glow: rgba(56, 189, 248, 0.5);
+  --ocean-glow-soft: rgba(56, 189, 248, 0.4);
+  --ocean-shadow: rgba(0, 0, 0, 0.5);
+  --ocean-bubble-edge: rgba(255, 255, 255, 0.8);
+  --ocean-bubble-tint: rgba(255, 255, 255, 0.25);
+  --ocean-black: #000;
+
+  background-image: url('/ocean%20background.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  min-height: 100vh;
+  color: var(--ocean-text);
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* ---- Kelp ---- */
+.dashboard .dash-kelp { position: fixed; bottom: 0; pointer-events: none; z-index: 1; opacity: 0.85; }
+.dashboard .dash-kelp-left { left: 0; width: 180px; }
+.dashboard .dash-kelp-right { right: 0; width: 220px; transform: scaleX(-1); }
+
+/* ---- Mascot ---- */
+.dashboard .dash-mascot {
+  position: fixed; top: 20px; right: 25px; z-index: 10;
+  display: flex; align-items: center; gap: 10px;
+  background: var(--ocean-glass); padding: 8px 16px; border-radius: 999px;
+  backdrop-filter: blur(8px); border: 1px solid var(--ocean-edge-accent);
+  transition: all 0.3s ease; box-shadow: none;
+}
+.dashboard .dash-mascot.is-bad {
+  background: var(--ocean-alert-glass); border-color: var(--ocean-alert-pale);
+  box-shadow: 0 0 20px var(--ocean-alert-glow);
+}
+.dashboard .dash-mascot-img { width: 40px; height: 40px; object-fit: contain; transition: transform 0.2s ease; }
+.dashboard .dash-mascot.is-bad .dash-mascot-img { transform: rotate(-15deg) scale(1.1); }
+.dashboard .dash-mascot-text { display: flex; flex-direction: column; }
+.dashboard .dash-mascot-name { font-weight: bold; color: var(--ocean-accent-soft); font-size: 0.9rem; }
+.dashboard .dash-mascot-status { font-size: 0.7rem; color: var(--ocean-muted); }
+.dashboard .dash-mascot.is-bad .dash-mascot-status { color: var(--ocean-alert-text); }
+
+/* ---- Layout ---- */
+.dashboard .dash-content { max-width: 1200px; margin: 0 auto; padding: 20px; position: relative; z-index: 2; }
+.dashboard .dash-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.dashboard .dash-title { margin: 0; color: var(--ocean-accent); font-size: 2rem; text-shadow: 0 0 12px var(--ocean-glow); }
+.dashboard .dash-pill {
+  padding: 6px 16px; border-radius: 999px; font-weight: 600;
+  background: var(--ocean-glass-pill); border: 1px solid var(--ocean-accent);
+}
+.dashboard .dash-pill.is-bad { background: var(--ocean-alert); border-color: var(--ocean-alert-edge); }
+
+.dashboard .dash-panel { backdrop-filter: blur(10px); border: 1px solid var(--ocean-edge); }
+
+/* ---- Controls ---- */
+.dashboard .dash-controls {
+  display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 28px;
+  background: var(--ocean-glass-light); padding: 12px 18px; border-radius: 16px;
+}
+.dashboard .dash-label { display: flex; flex-direction: column; font-size: 0.8rem; color: var(--ocean-muted); gap: 0; }
+.dashboard .dash-select {
+  background: var(--ocean-ink); color: var(--ocean-text); border: 1px solid var(--ocean-accent);
+  border-radius: 8px; padding: 6px 10px;
+}
+.dashboard .dash-btn {
+  background: var(--ocean-ink); color: var(--ocean-text); border: 1px solid var(--ocean-accent);
+  border-radius: 8px; padding: 8px 14px; cursor: pointer; font-size: 0.85rem;
+}
+.dashboard .dash-btn-primary { background: var(--ocean-accent-strong); font-weight: normal; }
+
+/* ---- Camera + side panel ---- */
+.dashboard .dash-main { display: grid; grid-template-columns: 1fr 320px; gap: 20px; margin-bottom: 40px; }
+.dashboard .dash-stage {
+  position: relative; background: var(--ocean-black); border-radius: 16px; overflow: hidden;
+  aspect-ratio: 16/9; border: 2px solid var(--ocean-edge-stage); box-shadow: 0 8px 32px var(--ocean-shadow);
+}
+.dashboard .dash-video { width: 100%; height: 100%; object-fit: cover; }
+.dashboard .dash-canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.dashboard .dash-stage-empty { position: absolute; inset: 0; display: grid; place-items: center; color: var(--ocean-muted); }
+
+.dashboard .dash-side { background: var(--ocean-glass); border-radius: 16px; padding: 16px; }
+.dashboard .dash-heading { margin: 10px 0 6px 0; color: var(--ocean-accent); }
+.dashboard .dash-heading:first-child { margin: 0 0 10px 0; }
+.dashboard .dash-table { width: 100%; font-size: 0.85rem; margin-bottom: 16px; }
+.dashboard .dash-table th, .dashboard .dash-table td { border-bottom: none; padding: 1px 2px; text-align: center; }
+.dashboard .dash-table th { color: var(--ocean-muted); font-weight: bold; font-size: inherit; }
+.dashboard .dash-table th:first-child, .dashboard .dash-table td:first-child { text-align: left; }
+.dashboard .dash-table thead tr { border-bottom: 1px solid var(--ocean-edge); }
+.dashboard .dash-log {
+  padding-left: 16px; margin: 0; max-height: 140px; overflow-y: auto;
+  font-size: 0.75rem; color: var(--ocean-log); list-style: decimal; font-family: inherit;
+}
+
+/* ---- Bubbles ---- */
+.dashboard .dash-bubbles { text-align: center; margin-top: 40px; padding-bottom: 80px; }
+.dashboard .dash-bubbles-title {
+  color: var(--ocean-accent-soft); font-size: 1.6rem; margin: 0 0 24px; text-transform: none;
+  text-shadow: 0 0 10px var(--ocean-glow-soft);
+}
+.dashboard .dash-bubble-row { display: flex; justify-content: center; gap: 40px; flex-wrap: wrap; }
+.dashboard .dash-bubble {
+  display: block; width: 180px; height: 180px; border-radius: 50%; position: relative; overflow: hidden;
+  cursor: pointer; text-decoration: none;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  box-shadow: 0 8px 25px var(--ocean-glow-soft); border: 3px solid var(--ocean-bubble-edge);
+}
+.dashboard .dash-bubble:hover { transform: scale(1.08); }
+.dashboard .dash-bubble-img { width: 100%; height: 100%; object-fit: cover; opacity: 0.85; }
+.dashboard .dash-bubble-overlay {
+  position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; text-align: center; padding: 16px;
+  background: var(--ocean-bubble-tint); backdrop-filter: blur(2px);
+}
+.dashboard .dash-bubble-icon { font-size: 2.2rem; }
+.dashboard .dash-bubble-label { font-weight: bold; font-size: 1rem; color: var(--ocean-accent-deep); margin-top: 4px; }

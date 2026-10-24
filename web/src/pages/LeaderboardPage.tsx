@@ -1,8 +1,9 @@
 // Three leaderboards. Loads once, then updates live from the WebSocket.
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { api, type Leaderboard } from '../api/http'
 import { onSocketMessage } from '../api/socket'
+import { ShrimpIcon } from '../components/ShrimpIcon'
 
 export function LeaderboardPage() {
   const [board, setBoard] = useState<Leaderboard | null>(null)
@@ -23,7 +24,7 @@ export function LeaderboardPage() {
       <h1>Leaderboard</h1>
       <div className="card-grid">
         <BoardCard
-          title="Most Shrimp 🦐"
+          title={<>Most Shrimp <ShrimpIcon /></>}
           hint="Highest % of time slouching"
           rows={board.shrimpiest.map((e) => [e.username, `${e.slouchPct}% slouching`])}
         />
@@ -45,7 +46,7 @@ export function LeaderboardPage() {
   )
 }
 
-function BoardCard({ title, hint, rows }: { title: string; hint: string; rows: [string, string][] }) {
+function BoardCard({ title, hint, rows }: { title: ReactNode; hint: string; rows: [string, string][] }) {
   return (
     <section className="card">
       <h2>{title}</h2>
