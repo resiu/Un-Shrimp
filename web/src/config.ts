@@ -14,7 +14,7 @@ export const CONFIG = {
 
   // After the screen jumpscare fires, wait this long before it can fire again.
   jumpscareCooldownMs: 20000,
-  // If you STAY slouched this long after the robot gets angry, escalate to the jumpscare.
+  // If you STAY slouched this long after slouching is detected, escalate to the jumpscare.
   jumpscareAfterBadMs: 4000,
 
   // Landmarks with visibility below this are ignored.
@@ -25,9 +25,6 @@ export const CONFIG = {
 
   // Calibration averages this many frames of "good" posture.
   calibrationFrames: 30,
-
-  // Arduino serial baud rate. MUST match Serial.begin() in the .ino file.
-  baudRate: 9600,
 
   // Pose model. "lite" is fastest; swap "lite" for "full" in both places if detection is shaky.
   modelUrl:

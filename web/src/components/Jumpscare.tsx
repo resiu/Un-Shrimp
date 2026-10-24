@@ -1,4 +1,4 @@
-// Full-screen jumpscare overlay. The face is an original SVG of our angry plush robot.
+// Full-screen jumpscare overlay. The face is an original SVG of an angry steampunk creature.
 // Want to use your own image instead? Put it at web/public/jumpscare.png and set USE_IMAGE = true.
 
 const USE_IMAGE = false
@@ -35,7 +35,7 @@ function AngryPlush() {
       <circle cx="260" cy="190" r="34" fill="#120000" />
       <circle cx="140" cy="192" r="14" fill="#ff1a1a" className="eye-glow" />
       <circle cx="260" cy="192" r="14" fill="#ff1a1a" className="eye-glow" />
-      {/* ANGRY eyebrows (these are the servos on the real robot) */}
+      {/* ANGRY eyebrows */}
       <polygon points="80,110 190,150 185,170 75,130" fill="#1a0f08" />
       <polygon points="320,110 210,150 215,170 325,130" fill="#1a0f08" />
       {/* jagged mouth */}
