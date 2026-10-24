@@ -9,7 +9,7 @@ export const CONFIG = {
 
   /*For front-view detection : how far from your calibrated posture counts as slouching*/
   // lower number higher sensitivity
-  faceGrowth: 0.06,    // head moves toward camera: ear-to-ear width grows 12%+ vs. shoulder width
+  faceGrowth: 0.08,    // head moves toward camera: ear-to-ear width grows 12%+ vs. shoulder width
   neckDrop: 0.08,      // head sinks toward shoulders: nose-to-shoulder gap shrinks 15%+
   tiltTolerance: 0.03, // one shoulder lower than the other (as a
 
