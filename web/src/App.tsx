@@ -6,6 +6,7 @@ import { CONFIG } from './config'
 import { createPoseLandmarker } from './lib/pose'
 import { computeAngles, PostureMonitor, type Angles, type PostureStatus } from './lib/posture'
 import { playScreech, unlockAudio } from './lib/sound'
+import { playRoast } from './lib/roast'
 import { Jumpscare } from './components/Jumpscare'
 
 const STATUS_LABEL: Record<PostureStatus, string> = {
@@ -51,6 +52,7 @@ export default function App({ onFrame }: { onFrame?: (frame: FrameReport) => voi
 
   const triggerJumpscare = useCallback(() => {
     playScreech()
+    void playRoast() // voice-over roast right after the screech (lib/roast.ts)
     setShowJumpscare(true)
     setTimeout(() => setShowJumpscare(false), 1500)
     // If the tab is in the background, at least pop a system notification.

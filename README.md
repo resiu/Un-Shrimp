@@ -116,7 +116,7 @@ Vite forwards `/api` and `/ws` to port 3001 (`web/vite.config.ts`), so the brows
 
 `ProfilePage` turns each detector frame into a reading (`web/src/lib/reading.ts`), reusing the thresholds in `config.ts`:
 
-- `neckAngle`: ear-over-shoulder angle. `shoulderAngle`: shoulder-over-hip (torso) angle, `null` when the hips are hidden.
+- `neckAngle`: nose-to-shoulder gap. `shoulderAngle`: how much one shoulder is lower than the other. Both are ratios of your shoulder width from the front-view detector, not degrees (the names are left over from the side view).
 - `slouching`: the detector's own decision (badge says SLOUCHING, after `badHoldMs`).
 - `score`: 100 at your calibrated posture, 50 right at the slouch threshold, 0 at twice the threshold.
 
@@ -134,6 +134,7 @@ All bodies are JSON. 🔒 = needs `Authorization: Bearer <token>`. Errors look l
 | 🔒 `POST /api/sessions` | | `{ sessionId }` (call when monitoring starts) |
 | 🔒 `POST /api/posture` | `{ sessionId, neckAngle, shoulderAngle, slouching, score }` | `{ ok: true }` |
 | `GET /api/leaderboard` | | `{ shrimpiest, straightest, mostImproved }` |
+| 🔒 `POST /api/roast` | | MP3 audio (line in the `X-Roast-Text` header), or `503 { error, text }` when there's no ElevenLabs voice |
 
 - `avgScore`, `slouchPct` and `improvement` are `null` until there's data. `slouchPct` is 0–100.
 - `improvement` = first session's slouch % minus latest session's (positive = better). Needs 2+ sessions.
@@ -160,6 +161,20 @@ useEffect(() => onSocketMessage((msg) => { if (msg.type === 'myStats') setStats(
 - `npm run seed`: re-creates the 6 fake users (password `password123`). Doesn't touch real accounts.
 - To wipe all data, stop the server and delete `backend/posture.db*`.
 - `npm run typecheck --prefix backend`: checks backend types (optional; Node itself ignores types).
+
+### Voice-over roasts (ElevenLabs)
+
+When the jumpscare fires, the app also plays a random spoken roast right after the screech.
+
+- **Edit the lines** in `backend/src/roasts.ts` (one list; save and the backend restarts).
+- **Turn on the ElevenLabs voice:**
+  1. Create a free account at [elevenlabs.io](https://elevenlabs.io) → Profile → **API Keys** → create a key.
+  2. Paste it into `backend/.env` after `ELEVENLABS_API_KEY=` (no quotes, no spaces). **Never commit it or put it in `web/`.**
+  3. Optional: pick a voice in their Voice Library and paste its ID after `ELEVENLABS_VOICE_ID=`.
+  4. Restart `npm run dev`.
+- **No key, or ElevenLabs is down / out of credits?** The browser reads the same line with its built-in voice, so the demo never goes silent. The reason is printed in the `[api]` terminal output.
+- Each line is generated once per server run and then reused, so 10 lines cost at most 10 generations. The jumpscare's `jumpscareCooldownMs` (in `config.ts`) also limits how often roasts play.
+- How it fits together: `App.tsx` (jumpscare) → `web/src/lib/roast.ts` → `POST /api/roast` → `backend/src/routes/roast.ts` → ElevenLabs.
 
 ## Camera placement tips
 

@@ -11,6 +11,7 @@ import { authRouter } from './routes/auth.ts'
 import { leaderboardRouter } from './routes/leaderboard.ts'
 import { meRouter } from './routes/me.ts'
 import { postureRouter } from './routes/posture.ts'
+import { roastRouter } from './routes/roast.ts'
 import { sessionsRouter } from './routes/sessions.ts'
 import { attachWebSocket } from './ws.ts'
 
@@ -19,7 +20,7 @@ const PORT = Number(process.env.PORT ?? 3001)
 const app = express()
 app.use(express.json()) // turns JSON request bodies into req.body
 
-app.use('/api', authRouter, meRouter, sessionsRouter, postureRouter, leaderboardRouter)
+app.use('/api', authRouter, meRouter, sessionsRouter, postureRouter, leaderboardRouter, roastRouter)
 
 app.use('/api', (_req, res) => {
   res.status(404).json({ error: 'No such API route' })
