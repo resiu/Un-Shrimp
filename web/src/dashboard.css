@@ -90,7 +90,7 @@
 /* ---- Bubbles ---- */
 .dashboard .dash-bubbles { text-align: center; margin-top: 40px; padding-bottom: 80px; }
 .dashboard .dash-bubbles-title {
-  color: var(--ocean-accent-soft); font-size: 1.6rem; margin: 0 0 24px; text-transform: none;
+  color: var(--sea-caustic); font-size: 1.6rem; margin: 0 0 24px; text-transform: none; /* lightest blue of the ocean */
   text-shadow: 0 0 10px var(--ocean-glow-soft);
 }
 .dashboard .dash-bubble-row { display: flex; justify-content: center; gap: 40px; flex-wrap: wrap; }

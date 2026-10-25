@@ -28,6 +28,7 @@ import { ProfilePage } from './pages/ProfilePage'
 import { OceanBackground } from './components/OceanBackground'
 import { PomodoroProvider, usePomodoro } from './pomodoro/PomodoroContext'
 import './pages.css'
+import './panels.css' // wave-shaped panels for every container; must load after pages.css
 
 function LoginRoute() {
   const { phase } = usePomodoro()

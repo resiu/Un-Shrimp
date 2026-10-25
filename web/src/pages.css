@@ -21,6 +21,7 @@
 .navbar a { color: var(--text); text-decoration: none; padding: 4px 0; border-bottom: 2px solid transparent; }
 .navbar a.active { color: var(--brass); border-bottom-color: var(--brass); }
 .navbar-spacer { flex: 1; }
+.navbar-user { color: var(--brass); font-weight: 600; } /* the logged-in username, top right */
 
 .card {
   background: var(--sea-glass); border: 1px solid var(--sea-glass-edge); border-radius: var(--radius);
@@ -43,8 +44,13 @@
 .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
 .stat { padding: 12px 16px; }
 .stat-value { font-size: 1.6rem; font-weight: 700; color: var(--brass); font-variant-numeric: tabular-nums; }
+.stat-label { font-weight: 700; } /* "Avg score", "Slouching", ... */
+/* "Shrimp Stats · username": the darkest blue of the ocean */
+.profile-title { color: var(--sea-silhouette-near); }
 
 .monitor-bar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin: 16px 0 0; }
+/* "Monitoring… a reading is sent every 5 seconds." / "Monitoring stopped.": the darkest blue of the ocean */
+.monitor-status { color: var(--sea-silhouette-near); font-weight: 600; }
 
 /* Floating Pomodoro button + menu (components/PomodoroButton.tsx) */
 .pomo {
