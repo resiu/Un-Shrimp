@@ -9,6 +9,7 @@ import { playRoast, SHRIMP_LEVELS } from './lib/roast'
 import { arduinoSupported, connectArduino, updateArduino } from './lib/arduino'
 import { Jumpscare } from './components/Jumpscare'
 import { ShrimpIcon } from './components/ShrimpIcon'
+import { usePomodoro } from './pomodoro/PomodoroContext'
 import './dashboard.css'
 
 
@@ -34,6 +35,7 @@ export type FrameReport = {
 
 
 export default function App({ onFrame }: { onFrame?: (frame: FrameReport) => void }) {
+  const { reportPresence } = usePomodoro()
   // Kept in a ref so a new onFrame function doesn't restart the detection loop.
   const onFrameRef = useRef(onFrame)
   useEffect(() => {
@@ -152,12 +154,18 @@ export default function App({ onFrame }: { onFrame?: (frame: FrameReport) => voi
 
   // ---- Main detection loop ----
   useEffect(() => {
-    if (!cameraOn || !modelReady) return //detecting if camera is on, if not --> do nothing
+    if (!cameraOn || !modelReady) {
+      reportPresence(null)
+      return
+    }
     const video = videoRef.current! //grabs <video> element
     const canvas = canvasRef.current! //grabs <canvas> element
     const ctx = canvas.getContext('2d')!
     const drawer = new DrawingUtils(ctx) //DrawingUtils is MediaPipe's helper for drawing the skeleton
+    const stream = video.srcObject as MediaStream | null
     let lastVideoTime = -1 //remembers the last frame processed so the same frame isn't analyzed more than once
+    let lastSeenAt: number | null = null
+    let detectionErrorReported = false
 
     // Voice-over roasts (lib/roast.ts): the first plays with the jumpscare in a human voice.
     // Still slouching? Another every roastRepeatMs, one shrimp level higher. Sitting up resets.
@@ -173,13 +181,34 @@ export default function App({ onFrame }: { onFrame?: (frame: FrameReport) => voi
 
     const id = setInterval(() => { //runs every 100ms
       const lm = landmarkerRef.current
-      if (!lm || video.readyState < 2 || video.currentTime === lastVideoTime) return //skips iteration if video has no data yet, or else mediaPipe will throw an error
+      const cameraLive = stream?.getVideoTracks().some((track) => track.readyState === 'live')
+      if (!lm || !cameraLive || video.readyState < 2) {
+        reportPresence(null)
+        return
+      }
+      const now = performance.now()
+      if (video.currentTime === lastVideoTime) {
+        reportPresence(lastSeenAt !== null && now - lastSeenAt < CONFIG.awayGraceMs)
+        return
+      }
       lastVideoTime = video.currentTime
 
 
-      const now = performance.now()
-      const result = lm.detectForVideo(video, now)
+      let result
+      try {
+        result = lm.detectForVideo(video, now)
+        detectionErrorReported = false
+      } catch (err) {
+        if (!detectionErrorReported) {
+          console.warn('Pose detection failed', err)
+          detectionErrorReported = true
+        }
+        reportPresence(null)
+        return
+      }
       const pose = result.landmarks[0] //the body's first 33 body points, or undefined if nobody is detected
+      if (pose) lastSeenAt = now
+      reportPresence(lastSeenAt !== null && now - lastSeenAt < CONFIG.awayGraceMs)
       const w = video.videoWidth
       const h = video.videoHeight
 
@@ -228,7 +257,7 @@ export default function App({ onFrame }: { onFrame?: (frame: FrameReport) => voi
 
 
     return () => clearInterval(id) //stop the timer when camera stops
-  }, [cameraOn, modelReady, addLog, triggerJumpscare]) //dependency array; tells react when to re-run this method; re-runs whenever any value in the array changes
+  }, [cameraOn, modelReady, addLog, triggerJumpscare, reportPresence]) //dependency array; tells react when to re-run this method; re-runs whenever any value in the array changes
                                                           //between renders
 
 

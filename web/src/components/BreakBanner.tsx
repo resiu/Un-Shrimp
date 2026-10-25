@@ -13,7 +13,7 @@ import { fmtClock, usePomodoro } from '../pomodoro/PomodoroContext'
 type Presence = 'starting' | 'here' | 'away' | 'no_camera'
 
 export function BreakBanner() {
-  const { remainingMs, reportAway } = usePomodoro()
+  const { remainingMs, reportPresence } = usePomodoro()
   const videoRef = useRef<HTMLVideoElement>(null)
   const [presence, setPresence] = useState<Presence>('starting')
 
@@ -26,7 +26,7 @@ export function BreakBanner() {
     let detectionErrorReported = false
 
     // Don't let the break clock run while the camera and model are still loading.
-    reportAway(false)
+    reportPresence(null)
 
     const release = () => {
       clearInterval(timer)
@@ -50,7 +50,7 @@ export function BreakBanner() {
         timer = setInterval(() => {
           const cameraLive = stream?.getVideoTracks().some((track) => track.readyState === 'live')
           if (!landmarker || !cameraLive || video.readyState < 2) {
-            reportAway(null)
+            reportPresence(null)
             setPresence('no_camera')
             return
           }
@@ -62,21 +62,21 @@ export function BreakBanner() {
             detectionErrorReported = false
             if (seen) lastSeenAt = now
             const away = now - lastSeenAt >= CONFIG.awayGraceMs
-            reportAway(away)
+            reportPresence(!away)
             setPresence(away ? 'away' : 'here')
           } catch (err) {
             if (!detectionErrorReported) {
               console.warn('Break presence detection failed', err)
               detectionErrorReported = true
             }
-            reportAway(null)
+            reportPresence(null)
             setPresence('no_camera')
           }
         }, CONFIG.detectIntervalMs)
       } catch (err) {
         console.warn('Break camera or pose model could not start', err)
         if (!cancelled) {
-          reportAway(null)
+          reportPresence(null)
           setPresence('no_camera')
         }
       }
@@ -86,9 +86,9 @@ export function BreakBanner() {
     return () => {
       cancelled = true
       release()
-      reportAway(null)
+      reportPresence(null)
     }
-  }, [reportAway])
+  }, [reportPresence])
 
   const message = {
     starting: 'Starting the camera…',

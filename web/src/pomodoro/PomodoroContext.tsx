@@ -2,13 +2,13 @@
 //
 //   off --Start--> work --(time's up)--> break --(time's up)--> work --> ...
 //
-// During a break, BreakBanner watches the camera and calls reportAway() to say whether you
-// are out of view. The break clock only runs while you're away, so you have to get up
-// and walk around.
+// The dashboard camera and BreakBanner report presence. Work counts while you're present;
+// breaks count while you're away.
 // State is saved in localStorage, so refreshing the page can't skip a break.
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react'
 import { CONFIG } from '../config'
+import { playPomodoroCue } from '../lib/sound'
 
 export type PomodoroPhase = 'off' | 'work' | 'break'
 
@@ -18,12 +18,15 @@ type PomodoroValue = Saved & {
   start: (workMin: number, breakMin: number) => void
   /** Ends a work session. Breaks cannot be stopped early. */
   stop: () => void
-  /** Called by BreakBanner: true = out of view, false = still in view, null = can't tell. */
-  reportAway: (away: boolean | null) => void
+  reset: () => void
+  /** true = in view, false = away, null = presence unavailable. */
+  reportPresence: (present: boolean | null) => void
 }
 
 const STORAGE_KEY = 'posture-bot-pomodoro'
+const CLOSED_AT_KEY = 'posture-bot-pomodoro-closed-at'
 const MIN = 60_000
+const RESET_AFTER_MS = 1 * MIN //MIN = 60000ms, 60 sec
 
 function load(): Saved {
   const fallback: Saved = {
@@ -33,6 +36,10 @@ function load(): Saved {
     breakMin: CONFIG.pomodoroBreakMin,
   }
   try {
+    const closedAt = Number(localStorage.getItem(CLOSED_AT_KEY))
+    localStorage.removeItem(CLOSED_AT_KEY)
+    if (closedAt > 0 && Date.now() - closedAt > RESET_AFTER_MS) return fallback
+
     const raw = localStorage.getItem(STORAGE_KEY)
     return raw ? { ...fallback, ...JSON.parse(raw) } : fallback
   } catch {
@@ -41,11 +48,11 @@ function load(): Saved {
 }
 
 /** Move the clock forward by `delta` ms and switch phase when it reaches zero. */
-function advance(s: Saved, delta: number, away: boolean | null): Saved {
+function advance(s: Saved, delta: number, present: boolean | null): Saved {
   if (s.phase === 'off') return s
-  // Focus time always counts. A break only counts when presence detection confirms you're away.
-  const counts = s.phase === 'work' || away === true
-  const remainingMs = s.remainingMs - (counts ? delta : 0)
+  const counts = s.phase === 'work' ? present === true : present === false
+  if (!counts) return s
+  const remainingMs = s.remainingMs - delta
   if (remainingMs > 0) return { ...s, remainingMs }
   return s.phase === 'work'
     ? { ...s, phase: 'break', remainingMs: s.breakMin * MIN }
@@ -71,7 +78,7 @@ const PomodoroContext = createContext<PomodoroValue | null>(null)
 
 export function PomodoroProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<Saved>(load)
-  const awayRef = useRef<boolean | null>(null)
+  const presenceRef = useRef<boolean | null>(null)
 
   // One clock for everything. Uses real elapsed time, so a throttled background tab stays accurate.
   useEffect(() => {
@@ -81,7 +88,7 @@ export function PomodoroProvider({ children }: { children: ReactNode }) {
       const now = Date.now()
       const delta = now - last
       last = now
-      setState((s) => advance(s, delta, awayRef.current))
+      setState((s) => advance(s, delta, presenceRef.current))
     }, 500)
     return () => clearInterval(id)
   }, [state.phase])
@@ -99,8 +106,10 @@ export function PomodoroProvider({ children }: { children: ReactNode }) {
   const prevPhase = useRef(state.phase)
   useEffect(() => {
     if (prevPhase.current === 'work' && state.phase === 'break') {
+      playPomodoroCue('break')
       notify('Break time 🚶', 'Step away from the screen and walk around.')
     } else if (prevPhase.current === 'break' && state.phase === 'work') {
+      playPomodoroCue('work')
       notify('Break over', 'Back to focus time.')
     }
     prevPhase.current = state.phase
@@ -120,6 +129,7 @@ export function PomodoroProvider({ children }: { children: ReactNode }) {
     if ('Notification' in window && Notification.permission === 'default') {
       void Notification.requestPermission()
     }
+    playPomodoroCue('work')
     setState((s) => ({
       ...s,
       phase: 'work',
@@ -136,12 +146,57 @@ export function PomodoroProvider({ children }: { children: ReactNode }) {
     })
   }, [])
 
-  const reportAway = useCallback((away: boolean | null) => {
-    awayRef.current = away
+  const reset = useCallback(() => {
+    const initial: Saved = {
+      phase: 'off',
+      remainingMs: 0,
+      workMin: CONFIG.pomodoroWorkMin,
+      breakMin: CONFIG.pomodoroBreakMin,
+    }
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(initial))
+      localStorage.removeItem(CLOSED_AT_KEY)
+    } catch {
+      // storage unavailable: reset still applies for the current app session
+    }
+    presenceRef.current = null
+    setState(initial)
+  }, [])
+
+  useEffect(() => {
+    const markClosed = () => {
+      try {
+        localStorage.setItem(CLOSED_AT_KEY, String(Date.now()))
+      } catch {
+        // storage unavailable: the timer still works, but cannot detect time between visits
+      }
+    }
+    const checkRestoredTab = (event: PageTransitionEvent) => {
+      if (!event.persisted) return
+      try {
+        const closedAt = Number(localStorage.getItem(CLOSED_AT_KEY))
+        localStorage.removeItem(CLOSED_AT_KEY)
+        if (closedAt > 0 && Date.now() - closedAt > RESET_AFTER_MS) reset()
+      } catch {
+        // storage unavailable: keep the in-memory timer state
+      }
+    }
+    window.addEventListener('pagehide', markClosed)
+    window.addEventListener('beforeunload', markClosed)
+    window.addEventListener('pageshow', checkRestoredTab)
+    return () => {
+      window.removeEventListener('pagehide', markClosed)
+      window.removeEventListener('beforeunload', markClosed)
+      window.removeEventListener('pageshow', checkRestoredTab)
+    }
+  }, [reset])
+
+  const reportPresence = useCallback((present: boolean | null) => {
+    presenceRef.current = present
   }, [])
 
   return (
-    <PomodoroContext.Provider value={{ ...state, start, stop, reportAway }}>
+    <PomodoroContext.Provider value={{ ...state, start, stop, reset, reportPresence }}>
       {children}
     </PomodoroContext.Provider>
   )

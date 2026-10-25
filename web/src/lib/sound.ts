@@ -33,6 +33,29 @@ export function playPop() {
   osc.stop(now + 0.1)
 }
 
+/** Short ascending cue for work and descending cue for breaks. */
+export function playPomodoroCue(phase: 'work' | 'break') {
+  const audioContext = getAudioContext()
+  const now = audioContext.currentTime
+  const notes = phase === 'work' ? [660, 880] : [880, 660, 440]
+  const noteDuration = 0.14
+  const gap = 0.04
+
+  notes.forEach((frequency, index) => {
+    const startAt = now + index * (noteDuration + gap)
+    const oscillator = audioContext.createOscillator()
+    const gain = audioContext.createGain()
+    oscillator.type = 'sine'
+    oscillator.frequency.setValueAtTime(frequency, startAt)
+    gain.gain.setValueAtTime(0.0001, startAt)
+    gain.gain.exponentialRampToValueAtTime(0.12, startAt + 0.01)
+    gain.gain.exponentialRampToValueAtTime(0.0001, startAt + noteDuration)
+    oscillator.connect(gain).connect(audioContext.destination)
+    oscillator.start(startAt)
+    oscillator.stop(startAt + noteDuration)
+  })
+}
+
 /** The one shared audio engine (the roasts in roast.ts use it too). */
 export function getAudioContext(): AudioContext {
   ctx ??= new AudioContext()
