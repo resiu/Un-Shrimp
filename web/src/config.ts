@@ -37,6 +37,12 @@ export const CONFIG = {
   // Calibration averages this many frames of "good" posture.
   calibrationFrames: 30,
 
+  // Arduino (USB serial). Baud must match BAUD in arduino/src/main.cpp.
+  arduinoBaud: 9600,
+  // The Uno restarts when the app connects; wait this long before sending.
+  arduinoBootMs: 2000,
+  // How often the shrimp score is sent to the Arduino (200 ms = 5 times a second).
+  arduinoSendMs: 200,
   // ---- Pomodoro timer (🍅 in the nav bar) ----
   // Default lengths. The 🍅 menu lets you pick others.
   pomodoroWorkMin: 25,

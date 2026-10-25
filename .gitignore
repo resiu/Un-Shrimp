@@ -10,6 +10,8 @@ Thumbs.db
 # backend secrets + local SQLite database
 backend/.env
 backend/*.db*
+# stray Python virtualenv
+.venv/
 .env
 backend/posture.db*
 node_modules/

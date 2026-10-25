@@ -31,6 +31,7 @@ web/                                  React + TypeScript + Vite app
   src/api/                            all backend calls (http.ts) + live updates (socket.ts)
   src/auth/                           who's logged in + redirect to /login
 backend/                              Node + Express + WebSocket + SQLite (port 3001)
+arduino/                              PlatformIO project for the Uno (RGB LED + buzzer)
 docs/TASKS.md                         who does what + milestones
 ```
 
@@ -177,6 +178,29 @@ When the jumpscare fires, the app also plays a spoken roast right after the scre
 - **No key, or ElevenLabs is down / out of credits?** The browser reads the same line with its built-in voice, so the demo never goes silent. The reason is printed in the `[api]` terminal output.
 - Each line is generated once per server run and then reused, so 10 lines cost at most 10 generations. The jumpscare's `jumpscareCooldownMs` (in `config.ts`) also limits how often roasts play.
 - How it fits together: `App.tsx` (jumpscare) → `web/src/lib/roast.ts` → `POST /api/roast` → `backend/src/routes/roast.ts` → ElevenLabs.
+
+## Arduino (RGB LED + buzzer)
+
+An Arduino Uno plugged into the laptop over USB shows your posture: **green** = good, **yellow-orange** = slouching, **red + one beep** = jumpscare (stays red until you sit up).
+
+Wiring: RGB LED red/green/blue on **D9/D10/D11** (PWM pins, each through a resistor), buzzer on **D2**. If the colors come out inverted, your LED is common-anode: set `COMMON_ANODE = true` in `arduino/src/main.cpp`.
+
+1. Install the **PlatformIO IDE** extension in VS Code.
+2. Open the `arduino/` folder in VS Code (*File → Open Folder*), plug in the Uno, and click **Upload** (→ in the bottom bar).
+3. Close PlatformIO's Serial Monitor if it's open, because only one program can use the port at a time.
+4. In the web app, click **Connect Arduino** and pick the Uno's port. It takes about 2 s to start, because the Uno restarts when the app connects.
+
+How it fits together: `App.tsx` + `ProfilePage.tsx` → `web/src/lib/arduino.ts` (Web Serial, Chrome/Edge only) → USB → `arduino/src/main.cpp`, at 9600 baud. The app sends one line of text at a time, each ending in `\n`:
+
+| Line | When | Arduino |
+| --- | --- | --- |
+| `0`–`100` (e.g. `37`) | about 5× a second (`arduinoSendMs`) | the **shrimp score**: 0 = straight, 100 = full shrimp. Below `SLOUCH_THRESHOLD` (50) → green, at or above → yellow-orange |
+| `J` | once per jumpscare | red + one ~200 ms beep. Stays red until a score below 50 arrives. A repeated `J` while red doesn't beep |
+| `O` | before calibrating / while recalibrating | LED off |
+
+Anything else is ignored. The shrimp score is `100 − posture score` from `web/src/lib/reading.ts`, which is exactly 50 at the slouch thresholds in `config.ts`. So `SLOUCH_THRESHOLD` in the sketch and `SLOUCH_SCORE` in `arduino.ts` must stay 50 unless the score formula changes. The LED has no 2-second hold, unlike the SLOUCHING badge: it reacts immediately.
+
+**Test without the web app:** open PlatformIO's Serial Monitor (9600 baud, line ending "LF"), type `20`, `70`, `J`, `20` or `O`, and press Enter after each.
 
 ## Camera placement tips
 

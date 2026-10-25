@@ -6,6 +6,7 @@ import { createPoseLandmarker } from './lib/pose'
 import { computeAngles, PostureMonitor, type Angles, type PostureStatus } from './lib/posture'
 import { playScreech, unlockAudio } from './lib/sound'
 import { playRoast, SHRIMP_LEVELS } from './lib/roast'
+import { arduinoSupported, connectArduino, updateArduino } from './lib/arduino'
 import { Jumpscare } from './components/Jumpscare'
 import { ShrimpIcon } from './components/ShrimpIcon'
 import './dashboard.css'
@@ -59,6 +60,7 @@ export default function App({ onFrame }: { onFrame?: (frame: FrameReport) => voi
   const [angles, setAngles] = useState<Angles | null>(null)
   const [baseline, setBaseline] = useState<PostureMonitor['baseline']>(null)
   const [showJumpscare, setShowJumpscare] = useState(false)
+  const [arduinoOn, setArduinoOn] = useState(false)
   const [log, setLog] = useState<string[]>([])
 
 
@@ -137,6 +139,17 @@ export default function App({ onFrame }: { onFrame?: (frame: FrameReport) => voi
   }
 
 
+  const connectToArduino = async () => {
+    try {
+      await connectArduino()
+      setArduinoOn(true)
+      addLog('Arduino connected')
+    } catch (err) {
+      addLog(`Arduino not connected: ${err}`)
+    }
+  }
+
+
   // ---- Main detection loop ----
   useEffect(() => {
     if (!cameraOn || !modelReady) return //detecting if camera is on, if not --> do nothing
@@ -206,6 +219,7 @@ export default function App({ onFrame }: { onFrame?: (frame: FrameReport) => voi
           roast(now, true)
         }
       }
+      updateArduino(monitor.status, events.includes('jumpscare'))
       // Still slouching (and still in frame) since the last roast? Roast again, shrimpier.
       if (monitor.status === 'bad' && a && lastRoastAt !== null && now - lastRoastAt >= CONFIG.roastRepeatMs) {
         roast(now, false)
@@ -258,6 +272,9 @@ export default function App({ onFrame }: { onFrame?: (frame: FrameReport) => voi
           <button onClick={startCamera} className="dash-btn">{cameraOn ? 'Switch camera' : '1. Start camera'}</button>
           <button onClick={calibrate} disabled={!cameraOn || !modelReady} className="dash-btn dash-btn-primary">
             2. Calibrate
+          </button>
+          <button onClick={connectToArduino} disabled={!arduinoSupported} className="dash-btn">
+            {arduinoOn ? 'Reconnect Arduino' : 'Connect Arduino'}
           </button>
         </section>
 
