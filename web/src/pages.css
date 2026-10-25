@@ -38,3 +38,38 @@
 .stat-value { font-size: 1.6rem; font-weight: 700; color: var(--brass); font-variant-numeric: tabular-nums; }
 
 .monitor-bar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin: 16px 0 0; }
+
+/* Floating Pomodoro button + menu (components/PomodoroButton.tsx) */
+.pomo {
+  position: fixed; right: calc(16px + env(safe-area-inset-right));
+  bottom: calc(16px + env(safe-area-inset-bottom)); z-index: 100;
+}
+.pomo-btn { display: flex; align-items: center; gap: 6px; }
+.pomo-btn.is-break { border-color: var(--bad); }
+.pomo-time { font-variant-numeric: tabular-nums; }
+.pomo-menu {
+  position: absolute; right: 0; bottom: calc(100% + 8px); z-index: 50;
+  width: min(240px, calc(100vw - 32px));
+  display: flex; flex-direction: column; gap: 10px; padding: 12px 16px;
+}
+.pomo-menu p { margin: 0; }
+.pomo-menu label { display: flex; flex-direction: column; gap: 4px; }
+.pomo-menu input {
+  width: 100%; font: inherit; color: var(--text); background: var(--bg);
+  border: 1px solid var(--panel-edge); border-radius: 6px; padding: 8px 10px;
+}
+
+/* Break banner on the Leaderboard (components/BreakBanner.tsx) */
+.break-banner {
+  position: sticky; top: 0; z-index: 40;
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  padding: 10px 16px; background: var(--sea-glass); border-bottom: 2px solid var(--brass);
+  backdrop-filter: blur(6px);
+}
+.break-banner.is-away { border-bottom-color: var(--good); }
+.break-cam {
+  width: 128px; height: 72px; object-fit: cover; border-radius: 8px;
+  background: #000; transform: scaleX(-1);
+}
+.break-text { display: flex; flex-direction: column; flex: 1; min-width: 200px; gap: 2px; }
+.break-clock { font-size: 2rem; font-weight: 700; color: var(--brass); font-variant-numeric: tabular-nums; }

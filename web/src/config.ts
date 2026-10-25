@@ -37,6 +37,13 @@ export const CONFIG = {
   // Calibration averages this many frames of "good" posture.
   calibrationFrames: 30,
 
+  // ---- Pomodoro timer (🍅 in the nav bar) ----
+  // Default lengths. The 🍅 menu lets you pick others.
+  pomodoroWorkMin: 25,
+  pomodoroBreakMin: 5,
+  // You count as "away" after being out of view this long (avoids flicker).
+  awayGraceMs: 2000,
+
   // Pose model. "lite" is fastest; swap "lite" for "full" in both places if detection is shaky.
   modelUrl:
     'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task',
