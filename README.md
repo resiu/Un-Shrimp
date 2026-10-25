@@ -1,4 +1,4 @@
-# Posture Bot 👹🪑
+# Un-Shrimp (for SBUHacks 2026)
 
 A webcam + browser app that watches you while you work and gets **angry** when you slouch.
 Built at SBUHacks 2026 ("Steel and Steam").
