@@ -1,4 +1,4 @@
-# Un-Shrimp (for SBUHacks 2026)
+# Un-Shrimp 🦐 (for SBUHacks 2026)
 
 A webcam + browser app that watches you while you work and gets **angry** when you slouch.
 Built at SBUHacks 2026 ("Steel and Steam").
@@ -89,7 +89,7 @@ Then open **http://localhost:5173** in Chrome:
 3. Sit up straight, facing the camera → **2. Calibrate**. Hold still for about 3 seconds.
 4. Optional: **Connect Arduino** (see [Arduino setup](#arduino-setup-optional)).
 5. **Start Monitoring** to record your posture to your stats and the leaderboard.
-6. Slouch. 😈
+6. Slouch. 
 
 > Always run `npm run dev` from the **repo root**, not from `web/`. Running it in `web/` starts only the website, so login fails with "Bad Gateway".
 >
@@ -110,9 +110,9 @@ An Arduino Uno plugged into the laptop shows your posture on your desk:
 
 | Your posture | LED | Buzzer |
 | --- | --- | --- |
-| Good | 🟢 green | – |
-| Slouching | 🟠 yellow-orange | – |
-| Jumpscare fired | 🔴 red, **stays red until you sit up** | one short beep (~200 ms) |
+| Good | green | – |
+| Slouching | yellow-orange | – |
+| Jumpscare fired | red, **stays red until you sit up** | one short beep (~200 ms) |
 | Not calibrated yet | off | – |
 
 ### 1. Wire it
@@ -287,7 +287,7 @@ The threshold 50 is the same line the app uses: the score is exactly 50 at the `
 
 ### 10. Pomodoro breaks
 
-Click **🍅** (bottom-right) to start a focus timer (default 25 min) followed by a break (default 5 min).
+Click **🦐** (bottom-right) to start a focus timer (default 25 min) followed by a break (default 5 min).
 
 - During a **break** every page is locked to the **Leaderboard**, with a banner showing the camera.
 - The break clock **only runs while you're out of the camera's view** (after `awayGraceMs`, 2 s), so you actually have to get up. If the camera can't run, the clock pauses.
@@ -341,7 +341,7 @@ Other knobs:
 ```
 package.json                    root: `npm run dev` starts web + backend together
 web/                            React + TypeScript + Vite website
-  src/config.ts                 ⭐ all tunable numbers
+  src/config.ts                 all tunable numbers
   src/App.tsx                   the detector: camera, skeleton, main loop, reactions
   src/AppRoutes.tsx             which page shows at which URL (+ ocean, Pomodoro lock)
   src/pages/                    Login, Leaderboard, Profile ("Shrimp Stats")
@@ -380,8 +380,8 @@ docs/TASKS.md                   who does what + milestones
 
 ### What designers can safely restyle
 
-- ✅ Anything in `web/src/pages/*.tsx` markup, `NavBar.tsx`, and `web/src/pages.css`: layout, wording, colors (use the CSS variables), emoji, extra visuals.
-- ❌ Leave alone: `web/src/api/`, `web/src/auth/`, the detection code (`App.tsx`, `lib/`), and the data flow in `ProfilePage.tsx` (the `onFrame`, Start/Stop Monitoring, and 5-second reading logic). When you prompt your AI, tell it: *"only change JSX and CSS, keep every hook, handler and import."*
+- Anything in `web/src/pages/*.tsx` markup, `NavBar.tsx`, and `web/src/pages.css`: layout, wording, colors (use the CSS variables), emoji, extra visuals.
+- Leave alone: `web/src/api/`, `web/src/auth/`, the detection code (`App.tsx`, `lib/`), and the data flow in `ProfilePage.tsx` (the `onFrame`, Start/Stop Monitoring, and 5-second reading logic). When you prompt your AI, tell it: *"only change JSX and CSS, keep every hook, handler and import."*
 
 ### Useful commands (from the repo root)
 
