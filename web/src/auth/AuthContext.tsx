@@ -7,6 +7,7 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react'
 import { api, ApiError, clearToken, getToken, setToken } from '../api/http'
 import { connectSocket, disconnectSocket } from '../api/socket'
+import { usePomodoro } from '../pomodoro/PomodoroContext'
 
 type AuthUser = { username: string }
 
@@ -21,14 +22,16 @@ type AuthValue = {
 const AuthContext = createContext<AuthValue | null>(null)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const { reset: resetPomodoro } = usePomodoro()
   const [user, setUser] = useState<AuthUser | null>(null)
   const [loading, setLoading] = useState(() => getToken() !== null)
 
   const logout = useCallback(() => {
+    resetPomodoro()
     clearToken()
     disconnectSocket()
     setUser(null)
-  }, [])
+  }, [resetPomodoro])
 
   // Check a saved token once, when the app starts.
   useEffect(() => {

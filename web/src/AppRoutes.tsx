@@ -70,8 +70,8 @@ export function AppRoutes() {
     <BrowserRouter>
       {/* Animated pixel ocean behind every page */}
       <OceanBackground />
-      <AuthProvider>
-        <PomodoroProvider>
+      <PomodoroProvider>
+        <AuthProvider>
           <Routes>
             <Route path="/login" element={<LoginRoute />} />
             <Route element={<ProtectedRoute />}>
@@ -82,8 +82,8 @@ export function AppRoutes() {
             </Route>
             <Route path="*" element={<Navigate to="/profile" replace />} />
           </Routes>
-        </PomodoroProvider>
-      </AuthProvider>
+        </AuthProvider>
+      </PomodoroProvider>
     </BrowserRouter>
   )
 }
