@@ -12,8 +12,9 @@ import App, { type FrameReport } from '../App'
 import { api, type MyStats } from '../api/http'
 import { onSocketMessage } from '../api/socket'
 import { REPORT_INTERVAL_MS, toReading } from '../lib/reading'
-import { ShrimpIcon } from '../components/ShrimpIcon'
+import { AnimatedShrimp } from '../components/AnimatedShrimp'
 import { noteFrame } from '../lib/arduino'
+import { publishFrame } from '../lib/frameFeed'
 
 export function ProfilePage() {
   const [stats, setStats] = useState<MyStats | null>(null)
@@ -32,11 +33,12 @@ export function ProfilePage() {
   const handleFrame = useCallback((frame: FrameReport) => {
     latestFrame.current = frame
     noteFrame(frame) // the Arduino LED uses the same frame (lib/arduino.ts)
+    publishFrame(frame) // ...and so does the animated shrimp (lib/frameFeed.ts)
   }, [])
 
   const startMonitoring = async () => {
     if (!latestFrame.current?.baseline) {
-      setNotice('Calibrate first: click "Start camera", sit up straight, then click "Calibrate".')
+      setNotice('Calibrate first: pick your camera under "Select camera", sit up straight, then click "Calibrate".')
       return
     }
     try {
@@ -66,7 +68,7 @@ export function ProfilePage() {
 
   return (
     <div className="page">
-      <h1>Shrimp Stats <ShrimpIcon />{stats && ` · ${stats.username}`}</h1>
+      <h1>Shrimp Stats <AnimatedShrimp mode="loop" />{stats && ` · ${stats.username}`}</h1>
 
       <div className="stat-grid">
         <Stat label="Avg score" value={stats?.avgScore ?? '—'} />

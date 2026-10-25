@@ -63,12 +63,13 @@ export function OceanBackground({ pixelSize = 5, speed = 1 }: { pixelSize?: numb
       render()
     }
 
-    // Pop bubbles under the mouse (or a finger). The canvas itself ignores the pointer
-    // so the page stays clickable; we listen on the window instead.
+    // Pop bubbles and scare fish under the mouse (or a finger). The canvas itself ignores
+    // the pointer so the page stays clickable; we listen on the window instead.
     const onPointerMove = (e: PointerEvent) => {
       if ((e.target as Element | null)?.closest?.(UI_SELECTOR)) return
       const x = (e.clientX / window.innerWidth) * scene.W
       const y = (e.clientY / window.innerHeight) * scene.H
+      scareFishAt(scene, x, y, t)
       if (popBubbleAt(scene, x, y, t)) {
         playPop()
         if (reduceMotion) {
@@ -156,7 +157,18 @@ function setPixel(img: ImageData, W: number, H: number, x: number, y: number, c:
 
 type Strand = { x: number; height: number; width: number; phase: number; branches: { at: number; dir: number }[] }
 type Layer = { color: 'silhouetteFar' | 'silhouetteMid' | 'silhouetteNear'; mound: Int16Array; strands: Strand[]; sway: number }
-type Fish = { big: boolean; colors: number; x: number; y: number; dir: 1 | -1; speed: number; phase: number; near: boolean }
+type Fish = {
+  big: boolean
+  colors: number
+  x: number
+  y: number
+  dir: 1 | -1
+  speed: number
+  phase: number
+  near: boolean
+  boost: number // extra speed after being scared; fades back to 0
+  scaredAt: number // scene time it last turned around
+}
 type Bubble = { x0: number; y: number; r: number; rise: number; sway: number; phase: number }
 type Speck = { x: number; y: number; vx: number; vy: number }
 type Pop = { x: number; y: number; r: number; born: number }
@@ -205,7 +217,8 @@ function updateScene(s: Scene, dt: number) {
   }
   for (let i = 0; i < s.fish.length; i++) {
     const f = s.fish[i]
-    f.x += f.dir * f.speed * dt
+    f.x += f.dir * f.speed * (1 + f.boost) * dt
+    f.boost = Math.max(0, f.boost - SCARED_FADE * dt)
     const gone = f.dir > 0 ? f.x > s.W + 20 : f.x < -20
     if (gone) s.fish[i] = newFishGroup(s.W, s.H, false)[0]
   }
@@ -458,6 +471,8 @@ function newFishGroup(W: number, H: number, anywhere: boolean): Fish[] {
     speed: big ? 5 + Math.random() * 4 : 7 + Math.random() * 7, // pixels per second
     phase: Math.random() * Math.PI * 2,
     near: Math.random() < 0.5,
+    boost: 0,
+    scaredAt: -Infinity,
   }
   if (big || Math.random() > 0.35) return [lead]
   return [
@@ -465,6 +480,34 @@ function newFishGroup(W: number, H: number, anywhere: boolean): Fish[] {
     { ...lead, x: lead.x - dir * 14, y: lead.y - 5, phase: lead.phase + 1 },
     { ...lead, x: lead.x - dir * 15, y: lead.y + 5, phase: lead.phase + 2 },
   ]
+}
+
+// Touching a fish makes it turn around and dart off: 2.5x speed that fades back over ~1.5 s.
+const SCARED_BOOST = 2.5
+const SCARED_FADE = SCARED_BOOST / 1.5
+const SCARED_COOLDOWN = 0.8 // seconds before the same fish can be turned again (no jittering)
+
+/** Fish under (x, y), in canvas pixels, turn around. Schoolmates nearby turn with it. */
+function scareFishAt(s: Scene, x: number, y: number, t: number) {
+  for (const f of s.fish) {
+    if (t - f.scaredAt < SCARED_COOLDOWN) continue
+    const sprite = (f.big ? BIG_FISH : SMALL_FISH)[0]
+    const left = Math.round(f.x)
+    const top = Math.round(f.y + Math.sin(t * 1.5 + f.phase)) // same bob as drawFish
+    const hit = x >= left - 1 && x <= left + sprite[0].length && y >= top - 1 && y <= top + sprite.length
+    if (!hit) continue
+    const oldDir = f.dir
+    for (const mate of s.fish) {
+      const sameSchool =
+        mate === f ||
+        (mate.colors === f.colors && mate.big === f.big && mate.dir === oldDir &&
+          Math.abs(mate.x - f.x) < 20 && Math.abs(mate.y - f.y) < 10)
+      if (!sameSchool) continue
+      mate.dir = oldDir > 0 ? -1 : 1
+      mate.boost = SCARED_BOOST
+      mate.scaredAt = t
+    }
+  }
 }
 
 function drawFish(img: ImageData, s: Scene, t: number, pal: Palette, near: boolean) {
