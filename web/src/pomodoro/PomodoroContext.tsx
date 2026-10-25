@@ -2,8 +2,7 @@
 //
 //   off --Start--> work --(time's up)--> break --(time's up)--> work --> ...
 //
-// The dashboard camera and BreakBanner report presence. Work counts while you're present;
-// breaks count while you're away.
+// Breaks count while you're away; focus time always counts.
 // State is saved in localStorage, so refreshing the page can't skip a break.
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react'
@@ -50,7 +49,7 @@ function load(): Saved {
 /** Move the clock forward by `delta` ms and switch phase when it reaches zero. */
 function advance(s: Saved, delta: number, present: boolean | null): Saved {
   if (s.phase === 'off') return s
-  const counts = s.phase === 'work' ? present === true : present === false
+  const counts = s.phase === 'work' || present === false
   if (!counts) return s
   const remainingMs = s.remainingMs - delta
   if (remainingMs > 0) return { ...s, remainingMs }
