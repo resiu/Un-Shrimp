@@ -1,0 +1,135 @@
+/* Wave-shaped pixel panels for every container (original artwork, drawn in CSS).
+   Inspired by flowing Japanese-style wave art: instead of plain rectangles, panels have
+   pixel-stepped wave crests on their top and bottom edges, a pale foam line along each
+   crest, and a few pixel bubbles on the bigger panels.
+
+   How it works:
+     mask    cuts the panel itself into the wave shape (so the video in the camera frame
+             is shaped too). Three layers: a repeating wave strip on top, one on the bottom,
+             and a plain block for the middle.
+     ::after draws the foam lines (+ bubbles), using the same repeating strip idea.
+   One swell = 48 x 10 pixels; --px is the size of one pixel.
+   Colors live in ocean.css (--panel-fill, --panel-foam). Loaded last, so these rules win. */
+
+:root {
+  /* One long swell, 48x10 pixels (generated): a rising crest, then a long trough.
+     Foam = a one-pixel line along the crest. */
+  --wave-fill: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 10' shape-rendering='crispEdges'%3E%3Cpath d='M0 5h1v5h-1zM1 5h1v5h-1zM2 4h1v6h-1zM3 3h1v7h-1zM4 2h1v8h-1zM5 2h1v8h-1zM6 1h1v9h-1zM7 1h1v9h-1zM8 0h1v10h-1zM9 0h1v10h-1zM10 0h1v10h-1zM11 0h1v10h-1zM12 0h1v10h-1zM13 1h1v9h-1zM14 1h1v9h-1zM15 2h1v8h-1zM16 2h1v8h-1zM17 3h1v7h-1zM18 3h1v7h-1zM19 4h1v6h-1zM20 4h1v6h-1zM21 5h1v5h-1zM22 5h1v5h-1zM23 5h1v5h-1zM24 5h1v5h-1zM25 6h1v4h-1zM26 6h1v4h-1zM27 6h1v4h-1zM28 6h1v4h-1zM29 6h1v4h-1zM30 6h1v4h-1zM31 6h1v4h-1zM32 6h1v4h-1zM33 7h1v3h-1zM34 7h1v3h-1zM35 7h1v3h-1zM36 8h1v2h-1zM37 8h1v2h-1zM38 8h1v2h-1zM39 8h1v2h-1zM40 8h1v2h-1zM41 8h1v2h-1zM42 8h1v2h-1zM43 8h1v2h-1zM44 8h1v2h-1zM45 7h1v3h-1zM46 7h1v3h-1zM47 6h1v4h-1z'/%3E%3C/svg%3E");
+  --wave-fill-down: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 10' shape-rendering='crispEdges'%3E%3Cg transform='translate(0 10) scale(1 -1)'%3E%3Cpath d='M0 5h1v5h-1zM1 5h1v5h-1zM2 4h1v6h-1zM3 3h1v7h-1zM4 2h1v8h-1zM5 2h1v8h-1zM6 1h1v9h-1zM7 1h1v9h-1zM8 0h1v10h-1zM9 0h1v10h-1zM10 0h1v10h-1zM11 0h1v10h-1zM12 0h1v10h-1zM13 1h1v9h-1zM14 1h1v9h-1zM15 2h1v8h-1zM16 2h1v8h-1zM17 3h1v7h-1zM18 3h1v7h-1zM19 4h1v6h-1zM20 4h1v6h-1zM21 5h1v5h-1zM22 5h1v5h-1zM23 5h1v5h-1zM24 5h1v5h-1zM25 6h1v4h-1zM26 6h1v4h-1zM27 6h1v4h-1zM28 6h1v4h-1zM29 6h1v4h-1zM30 6h1v4h-1zM31 6h1v4h-1zM32 6h1v4h-1zM33 7h1v3h-1zM34 7h1v3h-1zM35 7h1v3h-1zM36 8h1v2h-1zM37 8h1v2h-1zM38 8h1v2h-1zM39 8h1v2h-1zM40 8h1v2h-1zM41 8h1v2h-1zM42 8h1v2h-1zM43 8h1v2h-1zM44 8h1v2h-1zM45 7h1v3h-1zM46 7h1v3h-1zM47 6h1v4h-1z'/%3E%3C/g%3E%3C/svg%3E");
+  --wave-foam: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 10' shape-rendering='crispEdges'%3E%3Cpath d='M0 5h1v1h-1zM1 5h1v1h-1zM2 4h1v1h-1zM3 3h1v1h-1zM4 2h1v1h-1zM5 2h1v1h-1zM6 1h1v1h-1zM7 1h1v1h-1zM8 0h1v1h-1zM9 0h1v1h-1zM10 0h1v1h-1zM11 0h1v1h-1zM12 0h1v1h-1zM13 1h1v1h-1zM14 1h1v1h-1zM15 2h1v1h-1zM16 2h1v1h-1zM17 3h1v1h-1zM18 3h1v1h-1zM19 4h1v1h-1zM20 4h1v1h-1zM21 5h1v1h-1zM22 5h1v1h-1zM23 5h1v1h-1zM24 5h1v1h-1zM25 6h1v1h-1zM26 6h1v1h-1zM27 6h1v1h-1zM28 6h1v1h-1zM29 6h1v1h-1zM30 6h1v1h-1zM31 6h1v1h-1zM32 6h1v1h-1zM33 7h1v1h-1zM34 7h1v1h-1zM35 7h1v1h-1zM36 8h1v1h-1zM37 8h1v1h-1zM38 8h1v1h-1zM39 8h1v1h-1zM40 8h1v1h-1zM41 8h1v1h-1zM42 8h1v1h-1zM43 8h1v1h-1zM44 8h1v1h-1zM45 7h1v1h-1zM46 7h1v1h-1zM47 6h1v1h-1z'/%3E%3C/svg%3E");
+  --wave-foam-down: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 10' shape-rendering='crispEdges'%3E%3Cg transform='translate(0 10) scale(1 -1)'%3E%3Cpath d='M0 5h1v1h-1zM1 5h1v1h-1zM2 4h1v1h-1zM3 3h1v1h-1zM4 2h1v1h-1zM5 2h1v1h-1zM6 1h1v1h-1zM7 1h1v1h-1zM8 0h1v1h-1zM9 0h1v1h-1zM10 0h1v1h-1zM11 0h1v1h-1zM12 0h1v1h-1zM13 1h1v1h-1zM14 1h1v1h-1zM15 2h1v1h-1zM16 2h1v1h-1zM17 3h1v1h-1zM18 3h1v1h-1zM19 4h1v1h-1zM20 4h1v1h-1zM21 5h1v1h-1zM22 5h1v1h-1zM23 5h1v1h-1zM24 5h1v1h-1zM25 6h1v1h-1zM26 6h1v1h-1zM27 6h1v1h-1zM28 6h1v1h-1zM29 6h1v1h-1zM30 6h1v1h-1zM31 6h1v1h-1zM32 6h1v1h-1zM33 7h1v1h-1zM34 7h1v1h-1zM35 7h1v1h-1zM36 8h1v1h-1zM37 8h1v1h-1zM38 8h1v1h-1zM39 8h1v1h-1zM40 8h1v1h-1zM41 8h1v1h-1zM42 8h1v1h-1zM43 8h1v1h-1zM44 8h1v1h-1zM45 7h1v1h-1zM46 7h1v1h-1zM47 6h1v1h-1z'/%3E%3C/g%3E%3C/svg%3E");
+  /* Pixel bubbles: a 5x5 ring and a 3x3 ring. */
+  --bubble-big: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 5 5' shape-rendering='crispEdges'%3E%3Cpath d='M1 0h3v1h-3zM0 1h1v3h-1zM4 1h1v3h-1zM1 4h3v1h-3zM1 1h1v1h-1z'/%3E%3C/svg%3E");
+  --bubble-small: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 3 3' shape-rendering='crispEdges'%3E%3Cpath d='M1 0h1v1h-1zM0 1h1v1h-1zM2 1h1v1h-1zM1 2h1v1h-1z'/%3E%3C/svg%3E");
+}
+
+/* ---- Shared panel look ----
+   --wave-shift starts each panel type at a different point of the swell, so neighbouring
+   panels don't look stamped from the same pattern. */
+.dashboard .dash-panel,
+.dashboard .dash-stage,
+.card,
+.navbar,
+.break-banner {
+  --px: 3px;
+  --wave-w: calc(var(--px) * 48);
+  --wave-h: calc(var(--px) * 10);
+  --wave-shift: 0px;
+  background: var(--panel-fill);
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  backdrop-filter: blur(8px);
+  /* Swell on top + upside-down swell on the bottom (half a wave later) + a block in between. */
+  -webkit-mask:
+    var(--wave-fill) left var(--wave-shift) top / var(--wave-w) var(--wave-h) repeat-x,
+    var(--wave-fill-down) left calc(var(--wave-shift) + var(--wave-w) / 2) bottom / var(--wave-w) var(--wave-h) repeat-x,
+    linear-gradient(#000 0 0) center / 100% calc(100% - var(--wave-h) * 2 + 2px) no-repeat;
+  mask:
+    var(--wave-fill) left var(--wave-shift) top / var(--wave-w) var(--wave-h) repeat-x,
+    var(--wave-fill-down) left calc(var(--wave-shift) + var(--wave-w) / 2) bottom / var(--wave-w) var(--wave-h) repeat-x,
+    linear-gradient(#000 0 0) center / 100% calc(100% - var(--wave-h) * 2 + 2px) no-repeat;
+}
+/* Small containers get a smaller swell so they don't turn bulky. */
+.card.stat,
+.navbar,
+.break-banner,
+.dashboard .dash-controls { --px: 2px; }
+/* Different starting points along the swell. */
+.card.stat:nth-child(2n) { --wave-shift: -40px; }
+.card.stat:nth-child(3n) { --wave-shift: -70px; }
+.dashboard .dash-controls { --wave-shift: -30px; }
+.dashboard .dash-side { --wave-shift: -90px; }
+.card:not(.stat) { --wave-shift: -60px; }
+
+/* The foam layer needs a positioned parent. (.pomo-menu is absolute, .break-banner sticky
+   and .dash-stage relative already, so leave those alone.) */
+.dashboard .dash-panel,
+.card:not(.pomo-menu),
+.navbar {
+  position: relative;
+}
+
+/* ---- Foam along both crests ---- */
+.dashboard .dash-panel::after,
+.dashboard .dash-stage::after,
+.card::after,
+.navbar::after,
+.break-banner::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: var(--panel-foam);
+  -webkit-mask:
+    var(--wave-foam) left var(--wave-shift) top / var(--wave-w) var(--wave-h) repeat-x,
+    var(--wave-foam-down) left calc(var(--wave-shift) + var(--wave-w) / 2) bottom / var(--wave-w) var(--wave-h) repeat-x;
+  mask:
+    var(--wave-foam) left var(--wave-shift) top / var(--wave-w) var(--wave-h) repeat-x,
+    var(--wave-foam-down) left calc(var(--wave-shift) + var(--wave-w) / 2) bottom / var(--wave-w) var(--wave-h) repeat-x;
+}
+
+/* ---- Bigger panels also get two bubbles in the top-right corner ---- */
+.dashboard .dash-side::after,
+.card:not(.stat):not(.pomo-menu)::after {
+  -webkit-mask:
+    var(--wave-foam) left var(--wave-shift) top / var(--wave-w) var(--wave-h) repeat-x,
+    var(--wave-foam-down) left calc(var(--wave-shift) + var(--wave-w) / 2) bottom / var(--wave-w) var(--wave-h) repeat-x,
+    var(--bubble-big) right calc(var(--px) * 9) top calc(var(--wave-h) + var(--px) * 3) / calc(var(--px) * 5) calc(var(--px) * 5) no-repeat,
+    var(--bubble-small) right calc(var(--px) * 5) top calc(var(--wave-h) + var(--px) * 8) / calc(var(--px) * 3) calc(var(--px) * 3) no-repeat;
+  mask:
+    var(--wave-foam) left var(--wave-shift) top / var(--wave-w) var(--wave-h) repeat-x,
+    var(--wave-foam-down) left calc(var(--wave-shift) + var(--wave-w) / 2) bottom / var(--wave-w) var(--wave-h) repeat-x,
+    var(--bubble-big) right calc(var(--px) * 9) top calc(var(--wave-h) + var(--px) * 3) / calc(var(--px) * 5) calc(var(--px) * 5) no-repeat,
+    var(--bubble-small) right calc(var(--px) * 5) top calc(var(--wave-h) + var(--px) * 8) / calc(var(--px) * 3) calc(var(--px) * 3) no-repeat;
+}
+
+/* ---- Nav bar + break banner sit at the top of the page: flat top, swell only at the bottom ---- */
+.navbar,
+.break-banner {
+  -webkit-mask:
+    var(--wave-fill-down) left var(--wave-shift) bottom / var(--wave-w) var(--wave-h) repeat-x,
+    linear-gradient(#000 0 0) top / 100% calc(100% - var(--wave-h) + 2px) no-repeat;
+  mask:
+    var(--wave-fill-down) left var(--wave-shift) bottom / var(--wave-w) var(--wave-h) repeat-x,
+    linear-gradient(#000 0 0) top / 100% calc(100% - var(--wave-h) + 2px) no-repeat;
+}
+.navbar::after,
+.break-banner::after {
+  -webkit-mask: var(--wave-foam-down) left var(--wave-shift) bottom / var(--wave-w) var(--wave-h) repeat-x;
+  mask: var(--wave-foam-down) left var(--wave-shift) bottom / var(--wave-w) var(--wave-h) repeat-x;
+}
+
+/* ---- Camera frame: keep the black behind the video ---- */
+.dashboard .dash-stage { background: var(--ocean-black); backdrop-filter: none; }
+
+/* ---- Room for the swells so they never cut into text (padding follows the wave height) ---- */
+.dashboard .dash-controls { padding: calc(var(--wave-h) + 8px) 22px; }
+.dashboard .dash-side { padding: calc(var(--wave-h) + 6px) 20px; }
+.card { padding: calc(var(--wave-h) - 4px) 20px calc(var(--wave-h) + 8px); }
+.card.stat { padding: calc(var(--wave-h) + 4px) 18px; }
+.login-card { padding: calc(var(--wave-h) + 12px) 26px; }
+.pomo-menu.card { padding: calc(var(--wave-h) + 6px) 18px; }
+.navbar { padding: 10px 16px calc(var(--wave-h) + 6px); }
+.break-banner { padding: 12px 16px calc(var(--wave-h) + 8px); }

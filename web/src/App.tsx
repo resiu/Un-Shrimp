@@ -364,7 +364,7 @@ export default function App({ onFrame }: { onFrame?: (frame: FrameReport) => voi
 
         {/* Ocean bubble: link to the Leaderboard page */}
         <section className="dash-bubbles">
-          <h2 className="dash-bubbles-title">🌊 Interactive Posture Bubbles</h2>
+          <h2 className="dash-bubbles-title">Interactive Posture Bubbles</h2>
 
 
           <div className="dash-bubble-row">
@@ -372,7 +372,7 @@ export default function App({ onFrame }: { onFrame?: (frame: FrameReport) => voi
               <img src="/bubble1.png" alt="Bubble 1" className="dash-bubble-img" />
               <div className="dash-bubble-overlay">
                 <span className="dash-bubble-icon">🏆</span>
-                <span className="dash-bubble-label">Most Shrimp Leadership</span>
+                <span className="dash-bubble-label">Most Shrimp Leaderboard</span>
               </div>
             </Link>
           </div>

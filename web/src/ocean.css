@@ -44,6 +44,10 @@
   --fish-teal-fin: #22897d;
   --fish-teal-stripe: #f5cf3f;
 
+  /* Wave-shaped panels (panels.css): glassy deep-blue fill, pale foam along the crests */
+  --panel-fill: rgba(10, 52, 98, 0.78);
+  --panel-foam: #d6f1fb;
+
   /* See-through panels that sit on top of the ocean (nav bar, cards) */
   --sea-glass: rgba(10, 34, 64, 0.62);
   --sea-glass-edge: rgba(159, 220, 246, 0.25);

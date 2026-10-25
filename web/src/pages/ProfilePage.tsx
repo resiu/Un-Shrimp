@@ -68,7 +68,7 @@ export function ProfilePage() {
 
   return (
     <div className="page">
-      <h1>Shrimp Stats <AnimatedShrimp mode="loop" />{stats && ` · ${stats.username}`}</h1>
+      <h1 className="profile-title">Shrimp Stats <AnimatedShrimp mode="loop" />{stats && ` · ${stats.username}`}</h1>
 
       <div className="stat-grid">
         <Stat label="Avg score" value={stats?.avgScore ?? '—'} />
@@ -89,7 +89,15 @@ export function ProfilePage() {
         ) : (
           <button onClick={stopMonitoring}>Stop Monitoring</button>
         )}
-        {notice && <span className={notice.startsWith('Calibrate') ? 'warn' : 'muted'}>{notice}</span>}
+        {notice && (
+          <span
+            className={
+              notice.startsWith('Calibrate') ? 'warn' : notice.startsWith('Monitoring') ? 'monitor-status' : 'muted'
+            }
+          >
+            {notice}
+          </span>
+        )}
       </div>
 
       {/* The existing detector, unchanged except for the onFrame hook. */}
@@ -101,7 +109,7 @@ export function ProfilePage() {
 function Stat({ label, value }: { label: string; value: string | number }) {
   return (
     <div className="card stat">
-      <div className="muted small">{label}</div>
+      <div className="muted small stat-label">{label}</div>
       <div className="stat-value">{value}</div>
     </div>
   )

@@ -14,7 +14,7 @@ export function NavBar() {
       <span className="navbar-spacer" />
       {!onBreak && (
         <>
-          <span className="muted">{user?.username}</span>
+          <span className="navbar-user">{user?.username}</span>
           <button onClick={logout}>Log out</button>
         </>
       )}
