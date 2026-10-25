@@ -42,25 +42,6 @@
 .dashboard .dash-kelp-left { left: 0; width: 180px; }
 .dashboard .dash-kelp-right { right: 0; width: 220px; transform: scaleX(-1); }
 
-/* ---- Mascot ---- */
-.dashboard .dash-mascot {
-  position: fixed; top: 20px; right: 25px; z-index: 10;
-  display: flex; align-items: center; gap: 10px;
-  background: var(--ocean-glass); padding: 8px 16px; border-radius: 999px;
-  backdrop-filter: blur(8px); border: 1px solid var(--ocean-edge-accent);
-  transition: all 0.3s ease; box-shadow: none;
-}
-.dashboard .dash-mascot.is-bad {
-  background: var(--ocean-alert-glass); border-color: var(--ocean-alert-pale);
-  box-shadow: 0 0 20px var(--ocean-alert-glow);
-}
-.dashboard .dash-mascot-img { width: 40px; height: 40px; object-fit: contain; transition: transform 0.2s ease; }
-.dashboard .dash-mascot.is-bad .dash-mascot-img { transform: rotate(-15deg) scale(1.1); }
-.dashboard .dash-mascot-text { display: flex; flex-direction: column; }
-.dashboard .dash-mascot-name { font-weight: bold; color: var(--ocean-accent-soft); font-size: 0.9rem; }
-.dashboard .dash-mascot-status { font-size: 0.7rem; color: var(--ocean-muted); }
-.dashboard .dash-mascot.is-bad .dash-mascot-status { color: var(--ocean-alert-text); }
-
 /* ---- Layout ---- */
 .dashboard .dash-content { max-width: 1200px; margin: 0 auto; padding: 20px; position: relative; z-index: 2; }
 .dashboard .dash-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }

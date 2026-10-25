@@ -43,6 +43,12 @@ export const CONFIG = {
   arduinoBootMs: 2000,
   // How often the shrimp score is sent to the Arduino (200 ms = 5 times a second).
   arduinoSendMs: 200,
+  // ---- Pomodoro timer (🍅 in the nav bar) ----
+  // Default lengths. The 🍅 menu lets you pick others.
+  pomodoroWorkMin: 25,
+  pomodoroBreakMin: 5,
+  // You count as "away" after being out of view this long (avoids flicker).
+  awayGraceMs: 2000,
 
   // Pose model. "lite" is fastest; swap "lite" for "full" in both places if detection is shaky.
   modelUrl:

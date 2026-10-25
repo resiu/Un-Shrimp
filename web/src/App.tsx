@@ -44,6 +44,13 @@ export default function App({ onFrame }: { onFrame?: (frame: FrameReport) => voi
   const landmarkerRef = useRef<PoseLandmarker | null>(null)
   const monitorRef = useRef(new PostureMonitor())
 
+  // Turn the camera off when this page unmounts (e.g. when a break moves you to the Leaderboard).
+  useEffect(() => {
+    const video = videoRef.current // grab it now: the ref is already null by the time cleanup runs
+    return () => {
+      ;(video?.srcObject as MediaStream | null)?.getTracks().forEach((t) => t.stop())
+    }
+  }, [])
 
   const [cameras, setCameras] = useState<MediaDeviceInfo[]>([])
   const [cameraId, setCameraId] = useState('')
@@ -236,18 +243,6 @@ export default function App({ onFrame }: { onFrame?: (frame: FrameReport) => voi
       {/* Swaying Kelp Assets */}
       <img src="/kelp.png" alt="Kelp Left" className="dash-kelp dash-kelp-left" />
       <img src="/kelp.png" alt="Kelp Right" className="dash-kelp dash-kelp-right" />
-
-
-      {/* Floating Reactive Cooked Shrimp Mascot */}
-      <div className={`dash-mascot${bad ? ' is-bad' : ''}`}>
-        <img src="/cookedShrimp.png" alt="Cooked Shrimp Mascot" className="dash-mascot-img" />
-        <div className="dash-mascot-text">
-          <span className="dash-mascot-name">Posture Shrimp</span>
-          <span className="dash-mascot-status">
-            {bad ? 'Warning: Slouching!' : 'Ready & Watching'}
-          </span>
-        </div>
-      </div>
 
 
       <div className="dash-content">

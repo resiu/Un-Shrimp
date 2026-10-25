@@ -19,7 +19,7 @@ const MAX_FPS = 20
 
 // Bubbles under these elements can't be popped (you're using the UI, not playing).
 const UI_SELECTOR =
-  'button, a, input, select, textarea, label, video, .card, .navbar, .dash-panel, .dash-stage, .dash-bubble, .dash-mascot, .stat'
+  'button, a, input, select, textarea, label, video, .card, .navbar, .dash-panel, .dash-stage, .dash-bubble, .stat'
 
 export function OceanBackground({ pixelSize = 5, speed = 1 }: { pixelSize?: number; speed?: number }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
