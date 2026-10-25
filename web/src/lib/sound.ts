@@ -8,8 +8,14 @@ let ctx: AudioContext | null = null
 
 /** Browsers block audio until the user clicks something. Call this from a click handler. */
 export function unlockAudio() {
+  getAudioContext()
+}
+
+/** The one shared audio engine (the roasts in roast.ts use it too). */
+export function getAudioContext(): AudioContext {
   ctx ??= new AudioContext()
   if (ctx.state === 'suspended') void ctx.resume()
+  return ctx
 }
 
 export function playScreech() {

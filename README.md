@@ -164,9 +164,11 @@ useEffect(() => onSocketMessage((msg) => { if (msg.type === 'myStats') setStats(
 
 ### Voice-over roasts (ElevenLabs)
 
-When the jumpscare fires, the app also plays a random spoken roast right after the screech.
+When the jumpscare fires, the app also plays a spoken roast right after the screech, in a normal human voice. **Keep slouching and it turns into a shrimp:** another roast plays every `roastRepeatMs` (15 s, in `config.ts`), each one higher-pitched, more muffled and wobbly, with more bubbles, until it sounds like a shrimp underwater. Sit up and the next roast is human again.
 
-- **Edit the lines** in `backend/src/roasts.ts` (one list; save and the backend restarts).
+- **Edit the lines** in `backend/src/roasts.ts` (one list; save and the backend restarts). Each user hears every line once, in shuffled order, before any repeats.
+- **Tune the shrimp voice** in the `LEVELS` table at the top of `web/src/lib/roast.ts` (one row per level: pitch, underwater filter, wobble, bubbles). Add or remove rows to change how many steps it takes.
+- **Something not playing?** Open the browser console (F12). Every roast prints a `[roast]` line saying what played, or why it was skipped.
 - **Turn on the ElevenLabs voice:**
   1. Create a free account at [elevenlabs.io](https://elevenlabs.io) → Profile → **API Keys** → create a key.
   2. Paste it into `backend/.env` after `ELEVENLABS_API_KEY=` (no quotes, no spaces). **Never commit it or put it in `web/`.**

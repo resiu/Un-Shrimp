@@ -5,7 +5,7 @@ import { CONFIG } from './config'
 import { createPoseLandmarker } from './lib/pose'
 import { computeAngles, PostureMonitor, type Angles, type PostureStatus } from './lib/posture'
 import { playScreech, unlockAudio } from './lib/sound'
-import { playRoast } from './lib/roast'
+import { playRoast, SHRIMP_LEVELS } from './lib/roast'
 import { Jumpscare } from './components/Jumpscare'
 import { ShrimpIcon } from './components/ShrimpIcon'
 import './dashboard.css'
@@ -63,7 +63,6 @@ export default function App({ onFrame }: { onFrame?: (frame: FrameReport) => voi
 
   const triggerJumpscare = useCallback(() => {
     playScreech()
-    void playRoast() // voice-over roast right after the screech (lib/roast.ts)
     setShowJumpscare(true)
     setTimeout(() => setShowJumpscare(false), 1500)
     if (document.hidden && Notification.permission === 'granted') {
@@ -140,6 +139,17 @@ export default function App({ onFrame }: { onFrame?: (frame: FrameReport) => voi
     const drawer = new DrawingUtils(ctx) //DrawingUtils is MediaPipe's helper for drawing the skeleton
     let lastVideoTime = -1 //remembers the last frame processed so the same frame isn't analyzed more than once
 
+    // Voice-over roasts (lib/roast.ts): the first plays with the jumpscare in a human voice.
+    // Still slouching? Another every roastRepeatMs, one shrimp level higher. Sitting up resets.
+    let shrimpLevel = 0
+    let lastRoastAt: number | null = null
+    const roast = (now: number, afterScreech: boolean) => {
+      void playRoast(shrimpLevel, { afterScreech })
+      addLog(shrimpLevel === 0 ? 'Roast 🗣️' : `Roast 🦐 (shrimp level ${shrimpLevel})`)
+      lastRoastAt = now
+      shrimpLevel = Math.min(shrimpLevel + 1, SHRIMP_LEVELS - 1)
+    }
+
 
     const id = setInterval(() => { //runs every 100ms
       const lm = landmarkerRef.current
@@ -182,9 +192,16 @@ export default function App({ onFrame }: { onFrame?: (frame: FrameReport) => voi
           addLog('Slouch detected')
         } else if (e === 'became_good') {
           addLog('Back to good posture')
+          shrimpLevel = 0 // human voice again next time
+          lastRoastAt = null
         } else if (e === 'jumpscare') {
           triggerJumpscare()
+          roast(now, true)
         }
+      }
+      // Still slouching (and still in frame) since the last roast? Roast again, shrimpier.
+      if (monitor.status === 'bad' && a && lastRoastAt !== null && now - lastRoastAt >= CONFIG.roastRepeatMs) {
+        roast(now, false)
       }
     }, CONFIG.detectIntervalMs)
 

@@ -24,6 +24,10 @@ export const CONFIG = {
   // If you STAY slouched this long after slouching is detected, escalate to the jumpscare.
   jumpscareAfterBadMs: 3000,
 
+  // Still slouching after a roast? Roast again this often, one shrimp level higher each time
+  // (human voice -> full underwater shrimp). Sitting up resets to the human voice.
+  roastRepeatMs: 15000,
+
   // Landmarks with visibility below this are ignored.
   minVisibility: 0.5,
 

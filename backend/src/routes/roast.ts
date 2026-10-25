@@ -7,7 +7,7 @@
 // The API key lives only here on the server (backend/.env), never in the browser.
 
 import { Router } from 'express'
-import { requireAuth } from '../middleware/auth.ts'
+import { requireAuth, type AuthedRequest } from '../middleware/auth.ts'
 import { ROASTS } from '../roasts.ts'
 
 export const roastRouter = Router()
@@ -34,8 +34,36 @@ async function textToSpeech(text: string): Promise<Buffer> {
   return Buffer.from(await res.arrayBuffer())
 }
 
-roastRouter.post('/roast', requireAuth, async (_req, res) => {
-  const text = ROASTS[Math.floor(Math.random() * ROASTS.length)]
+// ---- Shuffled deck per user: every line plays once before any line repeats ----
+const decks = new Map<number, string[]>() // userId -> lines not played yet this round
+const lastLine = new Map<number, string>() // userId -> the line they heard last
+
+/** Next roast for this user. Reshuffles when the deck runs out, never repeating back to back. */
+export function nextRoast(userId: number): string {
+  let deck = decks.get(userId)
+  if (!deck || deck.length === 0) {
+    deck = shuffle([...ROASTS])
+    // We take from the end, so don't let the new round start with the line just played.
+    if (deck.length > 1 && deck[deck.length - 1] === lastLine.get(userId)) {
+      ;[deck[0], deck[deck.length - 1]] = [deck[deck.length - 1], deck[0]]
+    }
+    decks.set(userId, deck)
+  }
+  const text = deck.pop()!
+  lastLine.set(userId, text)
+  return text
+}
+
+function shuffle<T>(items: T[]): T[] {
+  for (let i = items.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[items[i], items[j]] = [items[j], items[i]]
+  }
+  return items
+}
+
+roastRouter.post('/roast', requireAuth, async (req, res) => {
+  const text = nextRoast((req as AuthedRequest).user.id)
 
   if (!API_KEY) {
     res.status(503).json({ error: 'No ELEVENLABS_API_KEY in backend/.env', text })
