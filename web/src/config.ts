@@ -37,6 +37,13 @@ export const CONFIG = {
   // Calibration averages this many frames of "good" posture.
   calibrationFrames: 30,
 
+  // Arduino (USB serial). Baud must match BAUD in arduino/src/main.cpp.
+  arduinoBaud: 9600,
+  // The Uno restarts when the app connects; wait this long before sending.
+  arduinoBootMs: 2000,
+  // How often the shrimp score is sent to the Arduino (200 ms = 5 times a second).
+  arduinoSendMs: 200,
+
   // Pose model. "lite" is fastest; swap "lite" for "full" in both places if detection is shaky.
   modelUrl:
     'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task',

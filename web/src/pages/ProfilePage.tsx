@@ -13,6 +13,7 @@ import { api, type MyStats } from '../api/http'
 import { onSocketMessage } from '../api/socket'
 import { REPORT_INTERVAL_MS, toReading } from '../lib/reading'
 import { ShrimpIcon } from '../components/ShrimpIcon'
+import { noteFrame } from '../lib/arduino'
 
 export function ProfilePage() {
   const [stats, setStats] = useState<MyStats | null>(null)
@@ -30,6 +31,7 @@ export function ProfilePage() {
 
   const handleFrame = useCallback((frame: FrameReport) => {
     latestFrame.current = frame
+    noteFrame(frame) // the Arduino LED uses the same frame (lib/arduino.ts)
   }, [])
 
   const startMonitoring = async () => {

@@ -10,3 +10,5 @@ Thumbs.db
 # backend secrets + local SQLite database
 backend/.env
 backend/*.db*
+# stray Python virtualenv
+.venv/
