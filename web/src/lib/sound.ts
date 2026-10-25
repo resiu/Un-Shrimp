@@ -11,6 +11,28 @@ export function unlockAudio() {
   getAudioContext()
 }
 
+let lastPop = 0
+
+/** A tiny bubble "pop" (used when the mouse pops a bubble in the ocean background). */
+export function playPop() {
+  // Never start the audio engine just for a pop; it's only used once a click unlocked it.
+  if (!ctx || ctx.state !== 'running') return
+  const now = ctx.currentTime
+  if (now - lastPop < 0.05) return // sweeping across many bubbles shouldn't be a buzz
+  lastPop = now
+  const osc = ctx.createOscillator()
+  osc.type = 'sine'
+  osc.frequency.setValueAtTime(700 + Math.random() * 500, now)
+  osc.frequency.exponentialRampToValueAtTime(180, now + 0.07)
+  const gain = ctx.createGain()
+  gain.gain.setValueAtTime(0.0001, now)
+  gain.gain.exponentialRampToValueAtTime(0.09, now + 0.005)
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.08)
+  osc.connect(gain).connect(ctx.destination)
+  osc.start(now)
+  osc.stop(now + 0.1)
+}
+
 /** The one shared audio engine (the roasts in roast.ts use it too). */
 export function getAudioContext(): AudioContext {
   ctx ??= new AudioContext()

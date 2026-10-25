@@ -8,15 +8,16 @@
 
 .navbar {
   display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
-  padding: 10px 16px; background: var(--panel); border-bottom: 1px solid var(--panel-edge);
+  padding: 10px 16px; background: var(--sea-glass); border-bottom: 1px solid var(--sea-glass-edge);
+  backdrop-filter: blur(6px);
 }
 .navbar a { color: var(--text); text-decoration: none; padding: 4px 0; border-bottom: 2px solid transparent; }
 .navbar a.active { color: var(--brass); border-bottom-color: var(--brass); }
 .navbar-spacer { flex: 1; }
 
 .card {
-  background: var(--panel); border: 1px solid var(--panel-edge); border-radius: var(--radius);
-  padding: 4px 16px 16px;
+  background: var(--sea-glass); border: 1px solid var(--sea-glass-edge); border-radius: var(--radius);
+  padding: 4px 16px 16px; backdrop-filter: blur(6px);
 }
 .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
 

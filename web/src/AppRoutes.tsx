@@ -12,6 +12,7 @@ import { NavBar } from './components/NavBar'
 import { LeaderboardPage } from './pages/LeaderboardPage'
 import { LoginPage } from './pages/LoginPage'
 import { ProfilePage } from './pages/ProfilePage'
+import { OceanBackground } from './components/OceanBackground'
 import './pages.css'
 
 /** The nav bar on top, then whichever page matches the URL. */
@@ -27,6 +28,8 @@ function Layout() {
 export function AppRoutes() {
   return (
     <BrowserRouter>
+      {/* Animated pixel ocean behind every page */}
+      <OceanBackground />
       <AuthProvider>
         <Routes>
           <Route path="/login" element={<LoginPage />} />

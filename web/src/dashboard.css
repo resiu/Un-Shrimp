@@ -30,10 +30,7 @@
   --ocean-bubble-tint: rgba(255, 255, 255, 0.25);
   --ocean-black: #000;
 
-  background-image: url('/ocean%20background.jpg');
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
+  /* The ocean behind this is the animated canvas in components/OceanBackground.tsx. */
   min-height: 100vh;
   color: var(--ocean-text);
   position: relative;
