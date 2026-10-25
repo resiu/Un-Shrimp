@@ -43,6 +43,14 @@ export const CONFIG = {
   arduinoBootMs: 2000,
   // How often the shrimp score is sent to the Arduino (200 ms = 5 times a second).
   arduinoSendMs: 200,
+  // Animated shrimp (components/AnimatedShrimp.tsx): it curls one more frame each time the
+  // posture score (100 = straight, 50 = slouch line) drops below one of these.
+  shrimpCurlScores: [70, 50, 30],
+  // How fast it curls/uncurls, per frame.
+  shrimpCurlStepMs: 150,
+  // The looping shrimp next to "Shrimp Stats": time per frame.
+  shrimpLoopStepMs: 200,
+
   // ---- Pomodoro timer (🍅 in the nav bar) ----
   // Default lengths. The 🍅 menu lets you pick others.
   pomodoroWorkMin: 25,

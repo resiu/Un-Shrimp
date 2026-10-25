@@ -5,6 +5,13 @@
 
 /* Shrimp mascot used in place of the 🦐 emoji (components/ShrimpIcon.tsx) */
 .shrimp-icon { height: 1.2em; width: auto; vertical-align: middle; }
+.shrimp-icon--lg { height: 2.4em; } /* next to "Posture Bot Dashboard" */
+
+/* Animated shrimp that curls as you slouch (components/AnimatedShrimp.tsx), with a gentle bob */
+.shrimp-anim { height: 1.2em; width: auto; vertical-align: middle; animation: shrimp-bob 2.4s ease-in-out infinite; }
+.shrimp-anim--xl { height: 9rem; }  /* the Pomodoro button (~5x the old 🍅 button) */
+@keyframes shrimp-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6%); } }
+@media (prefers-reduced-motion: reduce) { .shrimp-anim { animation: none; } }
 
 .navbar {
   display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
@@ -44,9 +51,87 @@
   position: fixed; right: calc(16px + env(safe-area-inset-right));
   bottom: calc(16px + env(safe-area-inset-bottom)); z-index: 100;
 }
-.pomo-btn { display: flex; align-items: center; gap: 6px; }
-.pomo-btn.is-break { border-color: var(--bad); }
-.pomo-time { font-variant-numeric: tabular-nums; }
+/* The button is just the shrimp: no box, no border. */
+.pomo-btn {
+  position: relative; display: flex; align-items: center; gap: 12px;
+  padding: 0; background: none; border: none; border-radius: 12px;
+}
+.pomo-btn:focus-visible { outline: 3px solid var(--sea-bubble-rim); outline-offset: 4px; }
+.pomo-btn .shrimp-anim { scale: -1 1; } /* flipped horizontally (separate from the bob's transform) */
+.pomo-btn.is-break .shrimp-anim { filter: drop-shadow(0 0 10px var(--bad)); } /* glows red on a break */
+.pomo-time {
+  font-variant-numeric: tabular-nums; font-size: 2rem; font-weight: 700;
+  color: var(--text); text-shadow: 0 2px 4px var(--bg);
+}
+
+/* Pixel-art speech bubble above the shrimp, in the bubble1.png colors.
+   --px is the size of one "pixel". Two stepped layers give rounded pixel corners:
+     ::before            black outline shape, corners cut 2 pixels then 1 (a little staircase)
+     .pomo-bubble-text   the fill, one pixel smaller all round, corners cut 1 pixel
+   The inset shadow is the darker shading band on the bottom/right, like the assets. */
+.pomo-bubble {
+  --px: 4px;
+  position: absolute; right: 55%; bottom: calc(88% + var(--px) * 6);
+  width: max-content; max-width: min(228px, calc(100vw - 40px));
+  text-align: left; font-size: 0.9rem; font-weight: 700; line-height: 1.3; color: var(--fish-outline);
+  animation: shrimp-bob 2.4s ease-in-out infinite;
+}
+.pomo-bubble::before {
+  content: ''; position: absolute; inset: 0; z-index: -1; background: var(--fish-outline);
+  clip-path: polygon(
+    0 calc(var(--px) * 2), var(--px) calc(var(--px) * 2), var(--px) var(--px),
+    calc(var(--px) * 2) var(--px), calc(var(--px) * 2) 0,
+    calc(100% - var(--px) * 2) 0, calc(100% - var(--px) * 2) var(--px),
+    calc(100% - var(--px)) var(--px), calc(100% - var(--px)) calc(var(--px) * 2), 100% calc(var(--px) * 2),
+    100% calc(100% - var(--px) * 2), calc(100% - var(--px)) calc(100% - var(--px) * 2),
+    calc(100% - var(--px)) calc(100% - var(--px)), calc(100% - var(--px) * 2) calc(100% - var(--px)),
+    calc(100% - var(--px) * 2) 100%,
+    calc(var(--px) * 2) 100%, calc(var(--px) * 2) calc(100% - var(--px)),
+    var(--px) calc(100% - var(--px)), var(--px) calc(100% - var(--px) * 2), 0 calc(100% - var(--px) * 2)
+  );
+}
+.pomo-bubble-text {
+  display: block; margin: var(--px); padding: 8px 12px; background: var(--sea-bubble-shine);
+  box-shadow: inset calc(var(--px) * -1) calc(var(--px) * -1) 0 0 var(--sea-bubble-fill);
+  clip-path: polygon(
+    0 var(--px), var(--px) var(--px), var(--px) 0,
+    calc(100% - var(--px)) 0, calc(100% - var(--px)) var(--px), 100% var(--px),
+    100% calc(100% - var(--px)), calc(100% - var(--px)) calc(100% - var(--px)), calc(100% - var(--px)) 100%,
+    var(--px) 100%, var(--px) calc(100% - var(--px)), 0 calc(100% - var(--px))
+  );
+}
+/* Stepped tail pointing down-right at the shrimp, drawn pixel by pixel
+   (o = outline, f = fill, s = shading band; one character = one --px pixel):
+     . s s s . .      <- opens a gap in the bubble's bottom outline
+     o f f f o .
+     . o f f s o
+     . . o f s o
+     . . . o s o
+     . . . . o o
+     . . . . . o
+   Each pixel is a shadow of a 1-pixel box (offsets never 0,0, which would be hidden). */
+.pomo-bubble::after {
+  --o: var(--fish-outline);
+  --f: var(--sea-bubble-shine);
+  --s: var(--sea-bubble-fill);
+  content: ''; position: absolute; top: calc(100% - var(--px)); right: calc(var(--px) * 8);
+  width: var(--px); height: var(--px);
+  box-shadow:
+    calc(var(--px) * 1) 0 0 0 var(--s), calc(var(--px) * 2) 0 0 0 var(--s), calc(var(--px) * 3) 0 0 0 var(--s),
+    0 calc(var(--px) * 1) 0 0 var(--o), calc(var(--px) * 1) calc(var(--px) * 1) 0 0 var(--f),
+    calc(var(--px) * 2) calc(var(--px) * 1) 0 0 var(--f), calc(var(--px) * 3) calc(var(--px) * 1) 0 0 var(--f),
+    calc(var(--px) * 4) calc(var(--px) * 1) 0 0 var(--o),
+    calc(var(--px) * 1) calc(var(--px) * 2) 0 0 var(--o), calc(var(--px) * 2) calc(var(--px) * 2) 0 0 var(--f),
+    calc(var(--px) * 3) calc(var(--px) * 2) 0 0 var(--f), calc(var(--px) * 4) calc(var(--px) * 2) 0 0 var(--s),
+    calc(var(--px) * 5) calc(var(--px) * 2) 0 0 var(--o),
+    calc(var(--px) * 2) calc(var(--px) * 3) 0 0 var(--o), calc(var(--px) * 3) calc(var(--px) * 3) 0 0 var(--f),
+    calc(var(--px) * 4) calc(var(--px) * 3) 0 0 var(--s), calc(var(--px) * 5) calc(var(--px) * 3) 0 0 var(--o),
+    calc(var(--px) * 3) calc(var(--px) * 4) 0 0 var(--o), calc(var(--px) * 4) calc(var(--px) * 4) 0 0 var(--s),
+    calc(var(--px) * 5) calc(var(--px) * 4) 0 0 var(--o),
+    calc(var(--px) * 4) calc(var(--px) * 5) 0 0 var(--o), calc(var(--px) * 5) calc(var(--px) * 5) 0 0 var(--o),
+    calc(var(--px) * 5) calc(var(--px) * 6) 0 0 var(--o);
+}
+@media (prefers-reduced-motion: reduce) { .pomo-bubble { animation: none; } }
 .pomo-menu {
   position: absolute; right: 0; bottom: calc(100% + 8px); z-index: 50;
   width: min(240px, calc(100vw - 32px));

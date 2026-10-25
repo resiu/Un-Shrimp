@@ -107,8 +107,7 @@ export default function App({ onFrame }: { onFrame?: (frame: FrameReport) => voi
     const devices = await navigator.mediaDevices.enumerateDevices()
     const cams = devices.filter((d) => d.kind === 'videoinput')
     setCameras(cams)
-    if (!cameraId && cams[0]) setCameraId(cams[0].deviceId)
-  }, [cameraId])
+  }, [])
 
 
   useEffect(() => {
@@ -116,18 +115,25 @@ export default function App({ onFrame }: { onFrame?: (frame: FrameReport) => voi
   }, [refreshCameras])
 
 
-  const startCamera = async () => {
+  // Picking a camera in the dropdown starts it (or switches to it). null = the browser's default.
+  const startCamera = async (deviceId: string | null) => {
     unlockAudio()
     const video = videoRef.current!
     ;(video.srcObject as MediaStream | null)?.getTracks().forEach((t) => t.stop())
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: cameraId ? { deviceId: { exact: cameraId } } : true,
-    })
-    video.srcObject = stream
-    await video.play()
-    setCameraOn(true)
-    addLog('Camera started')
-    void refreshCameras()
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: deviceId ? { deviceId: { exact: deviceId } } : true,
+      })
+      video.srcObject = stream
+      await video.play()
+      // Show the camera that actually started in the dropdown.
+      setCameraId(stream.getVideoTracks()[0]?.getSettings().deviceId ?? '')
+      setCameraOn(true)
+      addLog('Camera started')
+    } catch (err) {
+      addLog(`Camera failed to start: ${err}`)
+    }
+    void refreshCameras() // after permission, the real camera names show up
   }
 
 
@@ -269,36 +275,31 @@ export default function App({ onFrame }: { onFrame?: (frame: FrameReport) => voi
       <Jumpscare visible={showJumpscare} />
 
 
-      {/* Swaying Kelp Assets */}
-      <img src="/kelp.png" alt="Kelp Left" className="dash-kelp dash-kelp-left" />
-      <img src="/kelp.png" alt="Kelp Right" className="dash-kelp dash-kelp-right" />
-
-
       <div className="dash-content">
         <header className="dash-header">
-          <h1 className="dash-title"><ShrimpIcon /> Posture Bot Dashboard</h1>
+          <h1 className="dash-title"><ShrimpIcon large /> Posture Bot Dashboard</h1>
           <span className={`dash-pill${bad ? ' is-bad' : ''}`}>{STATUS_LABEL[status]}</span>
         </header>
 
 
         {/* System Controls */}
         <section className="dash-panel dash-controls">
-          <label className="dash-label">
-            Camera
-            <select
-              value={cameraId}
-              onChange={(e) => setCameraId(e.target.value)}
-              className="dash-select"
-            >
-              {cameras.length === 0 && <option value="">(click Start camera)</option>}
-              {cameras.map((c, i) => (
-                <option key={c.deviceId || i} value={c.deviceId}>
-                  {c.label || `Camera ${i + 1}`}
-                </option>
-              ))}
-            </select>
-          </label>
-          <button onClick={startCamera} className="dash-btn">{cameraOn ? 'Switch camera' : '1. Start camera'}</button>
+          {/* Picking a camera starts it. Before camera permission, cameras have no ids yet,
+              so those entries (and "Default camera") start the browser's default camera. */}
+          <select
+            value={cameraId}
+            onChange={(e) => void startCamera(e.target.value.startsWith('__') ? null : e.target.value)}
+            className="dash-select"
+            aria-label="Camera"
+          >
+            <option value="" disabled>Select camera</option>
+            {cameras.length === 0 && <option value="__default">Default camera</option>}
+            {cameras.map((c, i) => (
+              <option key={c.deviceId || i} value={c.deviceId || `__cam${i}`}>
+                {c.label || `Camera ${i + 1}`}
+              </option>
+            ))}
+          </select>
           <button onClick={calibrate} disabled={!cameraOn || !modelReady} className="dash-btn dash-btn-primary">
             2. Calibrate
           </button>
@@ -361,7 +362,7 @@ export default function App({ onFrame }: { onFrame?: (frame: FrameReport) => voi
         </main>
 
 
-        {/* Ocean bubbles: links to the real Leaderboard and Shrimp Stats pages */}
+        {/* Ocean bubble: link to the Leaderboard page */}
         <section className="dash-bubbles">
           <h2 className="dash-bubbles-title">🌊 Interactive Posture Bubbles</h2>
 
@@ -372,15 +373,6 @@ export default function App({ onFrame }: { onFrame?: (frame: FrameReport) => voi
               <div className="dash-bubble-overlay">
                 <span className="dash-bubble-icon">🏆</span>
                 <span className="dash-bubble-label">Most Shrimp Leadership</span>
-              </div>
-            </Link>
-
-
-            <Link to="/profile" className="dash-bubble">
-              <img src="/bubble2.png" alt="Bubble 2" className="dash-bubble-img" />
-              <div className="dash-bubble-overlay">
-                <span className="dash-bubble-icon">📊</span>
-                <span className="dash-bubble-label">Current Shrimp Stats</span>
               </div>
             </Link>
           </div>

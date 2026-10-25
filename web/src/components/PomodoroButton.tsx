@@ -1,8 +1,9 @@
-// The 🍅 icon in the nav bar. Click it to open the timer controls.
-// While the timer runs, the icon shows the time left.
+// The big shrimp button in the bottom-right corner. Click it to open the timer controls.
+// While the timer runs, it shows the time left. The shrimp curls up as you slouch.
 
 import { useState } from 'react'
 import { fmtClock, usePomodoro } from '../pomodoro/PomodoroContext'
+import { AnimatedShrimp } from './AnimatedShrimp'
 
 export function PomodoroButton() {
   const { phase, remainingMs, workMin, breakMin, start, stop } = usePomodoro()
@@ -27,9 +28,20 @@ export function PomodoroButton() {
         className={`pomo-btn${phase === 'break' ? ' is-break' : ''}`}
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
+        aria-label="Pomodoro timer"
         title="Pomodoro timer"
       >
-        🍅{running && <span className="pomo-time">{fmtClock(remainingMs)}</span>}
+        {!open && (
+          <span className="pomo-bubble">
+            <span className="pomo-bubble-text">
+              {phase === 'off' && 'Click on me to start a Pomodoro focus timer!'}
+              {phase === 'work' && 'Focus time! Click to check or stop the timer.'}
+              {phase === 'break' && 'Break time! Get up and walk away from the screen.'}
+            </span>
+          </span> 
+        )}
+        <AnimatedShrimp size="xl" />
+        {running && <span className="pomo-time">{fmtClock(remainingMs)}</span>}
       </button>
 
       {open && (
