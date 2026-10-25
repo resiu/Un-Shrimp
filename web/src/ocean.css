@@ -1,0 +1,67 @@
+/* The animated pixel ocean behind every page (components/OceanBackground.tsx).
+   Its colors live here so the team can recolor the ocean without touching code.
+   Deep-sea look: light surface fading to navy, in flat bands like our pixel assets. */
+
+:root {
+  /* Open water, top (sunlit) -> bottom (deep navy) */
+  --sea-water-1: #74c3df;
+  --sea-water-2: #62b1d6;
+  --sea-water-3: #4f99c8;
+  --sea-water-4: #3d7fb6;
+  --sea-water-5: #2c64a0;
+  --sea-water-6: #1b4783;
+  --sea-water-7: #0f2d62;
+  /* Light near the surface: ripple lines and white light patches */
+  --sea-caustic: #a9e0f0;
+  --sea-surface-light: #eef9fc;
+  /* Seaweed + coral silhouettes, far -> near (near is darkest) */
+  --sea-silhouette-far: #4d8fc2;
+  --sea-silhouette-mid: #285e98;
+  --sea-silhouette-near: #0c2452;
+  /* Bubbles (same colors as bubble1.png) */
+  --sea-bubble-rim: #7fe3e3;
+  --sea-bubble-fill: #a7d9d8;
+  --sea-bubble-shine: #e6eeee;
+  /* Drifting specks */
+  --sea-speck: #6fa8d6;
+
+  /* Fish: black outline like the kelp/shrimp assets, then 4 color schemes */
+  --fish-outline: #0b0f1a;
+  --fish-orange-body: #f07b3f;
+  --fish-orange-light: #ffb27a;
+  --fish-orange-fin: #c9521f;
+  --fish-orange-stripe: #fff3df;
+  --fish-yellow-body: #f5cf3f;
+  --fish-yellow-light: #fff0a0;
+  --fish-yellow-fin: #d99a1e;
+  --fish-yellow-stripe: #3a6fd8;
+  --fish-pink-body: #ee7fb1;
+  --fish-pink-light: #ffc2dc;
+  --fish-pink-fin: #c2507f;
+  --fish-pink-stripe: #ffffff;
+  --fish-teal-body: #3fc7b5;
+  --fish-teal-light: #a6f0e4;
+  --fish-teal-fin: #22897d;
+  --fish-teal-stripe: #f5cf3f;
+
+  /* See-through panels that sit on top of the ocean (nav bar, cards) */
+  --sea-glass: rgba(10, 34, 64, 0.62);
+  --sea-glass-edge: rgba(159, 220, 246, 0.25);
+}
+
+/* The old theme paints a brown background on <body>. Making #root its own layer
+   lets the ocean (z-index -1 inside it) sit above that brown but below the page. */
+#root {
+  position: relative;
+  z-index: 0;
+}
+
+.ocean-bg {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1; /* behind everything on the page */
+  pointer-events: none; /* clicks go to the page; bubble popping listens on the window */
+  image-rendering: pixelated; /* keep the big square pixels crisp when scaled up */
+}
